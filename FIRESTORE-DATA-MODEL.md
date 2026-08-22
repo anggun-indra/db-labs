@@ -96,19 +96,26 @@ never edited (spec §24). Published assignments are archived, not deleted.
 
 ```json
 {
-  "studentUid": "...",
+  "submissionId": "...",
   "assignmentId": "...",
+  "courseId": "...",
   "projectId": "...",
-  "erd": { "...": "frozen ErdProject" },
-  "snapshotId": "...",
+  "studentUid": "...",
   "version": 1,
+  "erdSnapshot": { "...": "frozen ErdProject" },
+  "sqliteSnapshotId": "...",
   "submittedAt": "...",
   "status": "submitted | graded",
   "score": null,
-  "feedback": null
+  "feedback": "",
+  "gradedAt": null,
+  "gradedByUid": null
 }
 ```
 
-A submission freezes a logical snapshot; students keep editing their project afterwards.
-Resubmission creates a new version (spec §26). Grading fields are written only by lecturers
-(enforced by rules).
+A submission freezes a logical snapshot (ERD + SQLite snapshot id + timestamp + version);
+students keep editing their project afterwards. Resubmission creates a new version
+(spec §26). Submission documents are created only AFTER the SQLite snapshot succeeds —
+no partial submissions. Grading fields (`score`, `feedback`, `status`, `gradedAt`,
+`gradedByUid`) are written only by lecturers — rules restrict updates to exactly those
+keys so the frozen payload is immutable for everyone. Submissions are never deleted.

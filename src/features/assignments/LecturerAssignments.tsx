@@ -25,6 +25,7 @@ import {
   type AssignmentStatus,
   type Course
 } from './domain/assignmentModel'
+import { SubmissionReviewDrawer } from '@/features/submissions/SubmissionReviewDrawer'
 
 /**
  * Lecturer assignment management (Phase 6): create, edit, publish /
@@ -61,6 +62,7 @@ export function LecturerAssignments() {
   const [error, setError] = useState<string | null>(null)
   const [editorOpen, setEditorOpen] = useState(false)
   const [editing, setEditing] = useState<Assignment | null>(null)
+  const [reviewTarget, setReviewTarget] = useState<Assignment | null>(null)
   const [form] = Form.useForm<EditorValues>()
 
   const load = useCallback(async () => {
@@ -241,6 +243,11 @@ export function LecturerAssignments() {
                     </Button>
                   </>
                 )}
+                {assignment.status !== 'draft' && (
+                  <Button size="small" onClick={() => setReviewTarget(assignment)}>
+                    Review
+                  </Button>
+                )}
                 {assignment.status === 'draft' && (
                   <Popconfirm
                     title="Delete this draft?"
@@ -324,6 +331,12 @@ export function LecturerAssignments() {
           </Form.Item>
         </Form>
       </Modal>
+
+      <SubmissionReviewDrawer
+        assignment={reviewTarget}
+        open={reviewTarget !== null}
+        onClose={() => setReviewTarget(null)}
+      />
     </div>
   )
 }

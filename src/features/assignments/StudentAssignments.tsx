@@ -20,6 +20,8 @@ import {
   RocketOutlined
 } from '@ant-design/icons'
 import { getAssignmentService } from '@/lib/firebase/assignmentInstance'
+import { getSubmissionService } from '@/lib/firebase/submissionInstance'
+import type { Submission } from '@/features/submissions/domain/submissionModel'
 import { projectRepository } from '@/lib/persistence/localProjectRepository'
 import {
   formatDueDate,
@@ -49,19 +51,23 @@ export function StudentAssignments() {
   const [error, setError] = useState<string | null>(null)
   const [detail, setDetail] = useState<Assignment | null>(null)
   const [starting, setStarting] = useState(false)
+  const [mySubmissions, setMySubmissions] = useState<Submission[]>([])
+  const [submitting, setSubmitting] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
-      const [published, courseList, projects] = await Promise.all([
+      const [published, courseList, projects, submissions] = await Promise.all([
         getAssignmentService().listPublished(),
         getAssignmentService().listCourses(),
-        projectRepository.listProjects()
+        projectRepository.listProjects(),
+        getSubmissionService().listMine()
       ])
       setAssignments(published.sort((a, b) => (a.dueAt ?? '').localeCompare(b.dueAt ?? '')))
       setCourses(courseList)
       setProjectIds(new Set(projects.map((p) => p.id)))
+      setMySubmissions(submissions)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not load assignments.')
     } finally {
@@ -138,6 +144,47 @@ export function StudentAssignments() {
     [message, navigate]
   )
 
+  const handleSubmit = useCallback(
+    async (assignment: Assignment) => {
+      const link = getLink(assignment.assignmentId)
+      if (!link) return
+      setSubmitting(true)
+      try {
+        const project = await projectRepository.loadProject(link.projectId)
+        if (!project) {
+          void message.error('The linked project no longer exists.')
+          return
+        }
+        const submission = await getSubmissionService().submit({
+          assignmentId: assignment.assignmentId,
+          courseId: assignment.courseId,
+          projectId: link.projectId,
+          erd: project,
+          fileName: `${assignment.title.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-v.sqlite`
+        })
+        void message.success(
+          `Submitted version ${submission.version}. Your project stays editable; resubmit any time.`
+        )
+        setMySubmissions((prev) => [...prev, submission])
+      } catch (err) {
+        void message.error(
+          err instanceof Error ? err.message : 'Submission failed — nothing was marked as submitted.'
+        )
+      } finally {
+        setSubmitting(false)
+      }
+    },
+    [message]
+  )
+
+  const submissionsFor = useCallback(
+    (assignmentId: string) =>
+      mySubmissions
+        .filter((submission) => submission.assignmentId === assignmentId)
+        .sort((a, b) => b.version - a.version),
+    [mySubmissions]
+  )
+
   if (loading) {
     return (
       <div className="page-centered">
@@ -157,7 +204,9 @@ export function StudentAssignments() {
           grid={{ gutter: 16, xs: 1, md: 2, xl: 3 }}
           dataSource={assignments}
           renderItem={(assignment) => {
-            const progress = deriveProgress(assignment.assignmentId, projectIds)
+            const submitted = submissionsFor(assignment.assignmentId).length > 0
+            const baseProgress = deriveProgress(assignment.assignmentId, projectIds)
+            const progress = submitted && baseProgress !== 'not-started' ? 'submitted' : baseProgress
             const link = getLink(assignment.assignmentId)
             const overdue = isOverdue(assignment.dueAt) && progress !== 'submitted'
             return (
@@ -209,10 +258,24 @@ export function StudentAssignments() {
                       {assignment.description || 'No description.'}
                     </Typography.Paragraph>
                     <Tag
-                      color={progress === 'in-progress' ? 'green' : 'default'}
-                      icon={progress === 'in-progress' ? <CheckCircleOutlined /> : undefined}
+                      color={
+                        progress === 'submitted'
+                          ? 'gold'
+                          : progress === 'in-progress'
+                            ? 'green'
+                            : 'default'
+                      }
+                      icon={
+                        progress === 'submitted' || progress === 'in-progress' ? (
+                          <CheckCircleOutlined />
+                        ) : undefined
+                      }
                     >
-                      {progress === 'in-progress' ? 'In progress' : 'Not started'}
+                      {progress === 'submitted'
+                        ? `Submitted (${submissionsFor(assignment.assignmentId).length})`
+                        : progress === 'in-progress'
+                          ? 'In progress'
+                          : 'Not started'}
                     </Tag>
                   </Space>
                 </Card>
@@ -289,6 +352,55 @@ export function StudentAssignments() {
                   Initialize local DB from starter SQL
                 </Button>
               )}
+            {getLink(detail.assignmentId) && (
+              <div>
+                <Typography.Text strong>Submission</Typography.Text>
+                <div style={{ marginTop: 8 }}>
+                  <Button
+                    type="primary"
+                    loading={submitting}
+                    onClick={() => void handleSubmit(detail)}
+                    data-testid="submit-work"
+                  >
+                    {submissionsFor(detail.assignmentId).length > 0
+                      ? 'Resubmit (new version)'
+                      : 'Submit work'}
+                  </Button>
+                </div>
+                {submissionsFor(detail.assignmentId).length > 0 && (
+                  <List
+                    size="small"
+                    style={{ marginTop: 8 }}
+                    dataSource={submissionsFor(detail.assignmentId)}
+                    renderItem={(submission) => (
+                      <List.Item>
+                        <Space>
+                          <Tag>v{submission.version}</Tag>
+                          <Typography.Text type="secondary">
+                            {new Date(submission.submittedAt).toLocaleString()}
+                          </Typography.Text>
+                          {submission.status === 'graded' ? (
+                            <Tag color="green">
+                              score {submission.score}
+                            </Tag>
+                          ) : (
+                            <Tag color="blue">awaiting review</Tag>
+                          )}
+                        </Space>
+                        {submission.feedback && (
+                          <Typography.Paragraph
+                            style={{ marginBottom: 0, marginTop: 4 }}
+                            ellipsis={{ rows: 2, expandable: true }}
+                          >
+                            {submission.feedback}
+                          </Typography.Paragraph>
+                        )}
+                      </List.Item>
+                    )}
+                  />
+                )}
+              </div>
+            )}
           </Space>
         )}
       </Drawer>

@@ -88,7 +88,23 @@ service cloud.firestore {
         && resource.data.createdByUid == request.auth.uid;
     }
 
-    // Phase 7 collections (submissions) get their rules added in that
-    // phase; deny by default until then.
+    // Submissions (Phase 7): frozen snapshots. Students create/read their
+    // own and can never touch grading fields; lecturers read all and update
+    // grading fields only — the frozen payload stays immutable for both.
+    match /submissions/{submissionId} {
+      allow read: if signedIn()
+        && (isLecturer() || resource.data.studentUid == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.studentUid == request.auth.uid
+        && request.resource.data.submissionId == submissionId
+        && request.resource.data.version is int
+        && request.resource.data.version >= 1;
+      allow update: if isLecturer()
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['score', 'feedback', 'status', 'gradedAt', 'gradedByUid']);
+      allow delete: if false;
+    }
+
+    // Phase 8 hardening keeps the deny-by-default posture for anything new.
   }
 }

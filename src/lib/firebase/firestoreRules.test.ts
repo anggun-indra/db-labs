@@ -295,4 +295,81 @@ describe.skipIf(!canRun)('Firestore security rules (emulator)', () => {
       setDoc(doc(lecturer2.firestore(), 'assignments/asg-own'), assignmentDoc('lec-1', 'archived'))
     )
   })
+
+  /* Phase 7: submissions */
+
+  const submissionDoc = (studentUid: string, version = 1, status = 'submitted') => ({
+    submissionId: 'sub-1',
+    assignmentId: 'asg-1',
+    courseId: 'c1',
+    projectId: 'p1',
+    studentUid,
+    version,
+    erdSnapshot: null,
+    sqliteSnapshotId: 'snap-1',
+    submittedAt: '2024-06-01T10:00:00.000Z',
+    status,
+    score: null,
+    feedback: '',
+    gradedAt: null,
+    gradedByUid: null
+  })
+
+  it('students create and read only their own submissions', async () => {
+    const student = testEnv().authenticatedContext('uid-a')
+    await assertSucceeds(
+      setDoc(doc(student.firestore(), 'submissions/sub-own'), submissionDoc('uid-a'))
+    )
+    await assertSucceeds(getDoc(doc(student.firestore(), 'submissions/sub-own')))
+    // Cannot submit on someone else's behalf.
+    await assertFails(
+      setDoc(doc(student.firestore(), 'submissions/sub-other'), submissionDoc('uid-b'))
+    )
+    // Cannot read someone else's submission.
+    await assertFails(getDoc(doc(student.firestore(), 'submissions/sub-other')))
+  })
+
+  it('students cannot grade their own submission or change frozen fields', async () => {
+    const student = testEnv().authenticatedContext('uid-a')
+    await assertSucceeds(
+      setDoc(doc(student.firestore(), 'submissions/sub-own'), submissionDoc('uid-a'))
+    )
+    await assertFails(
+      setDoc(doc(student.firestore(), 'submissions/sub-own'), {
+        ...submissionDoc('uid-a'),
+        score: 100,
+        status: 'graded'
+      })
+    )
+    await assertFails(deleteDoc(doc(student.firestore(), 'submissions/sub-own')))
+  })
+
+  it('lecturers update grading fields only, never the frozen payload', async () => {
+    await seedLecturer('lec-1')
+    const student = testEnv().authenticatedContext('uid-a')
+    await assertSucceeds(
+      setDoc(doc(student.firestore(), 'submissions/sub-1'), submissionDoc('uid-a'))
+    )
+
+    const lecturer = testEnv().authenticatedContext('lec-1')
+    await assertSucceeds(getDoc(doc(lecturer.firestore(), 'submissions/sub-1')))
+    // Allowed: grading fields only.
+    await assertSucceeds(
+      setDoc(doc(lecturer.firestore(), 'submissions/sub-1'), {
+        ...submissionDoc('uid-a'),
+        score: 85,
+        feedback: 'Bagus',
+        status: 'graded',
+        gradedAt: '2024-06-02T10:00:00.000Z',
+        gradedByUid: 'lec-1'
+      })
+    )
+    // Denied: tampering with the frozen payload.
+    await assertFails(
+      setDoc(doc(lecturer.firestore(), 'submissions/sub-1'), {
+        ...submissionDoc('uid-a'),
+        version: 9
+      })
+    )
+  })
 })

@@ -1,7 +1,7 @@
 # Roadmap
 
 Phase plans from spec §43. Detailed per-phase planning documents live at the repo root
-(`phase-*.md`). Status as of Phase 6 completion.
+(`phase-*.md`). Status as of Phase 7 completion.
 
 | Phase | Scope                                          | Status  | Planning doc                            |
 | ----- | ---------------------------------------------- | ------- | --------------------------------------- |
@@ -12,10 +12,10 @@ Phase plans from spec §43. Detailed per-phase planning documents live at the re
 | 4     | Firebase Auth + project sync                   | ✅ done | `phase-4-firebase-auth-projects.md`     |
 | 5     | SQLite snapshots via Firestore chunking        | ✅ done | `phase-5-firestore-sqlite-snapshots.md` |
 | 6     | Courses & assignments                          | ✅ done | `phase-6-assignments.md`                |
-| 7     | Submission + lecturer review                   | ⏳ next | `phase-7-submission-lecturer-review.md` |
-| 8     | Hardening (rules tests, a11y, PWA tests, docs) | planned | spec §43                                |
+| 7     | Submission + lecturer review                   | ✅ done | `phase-7-submission-lecturer-review.md` |
+| 8     | Hardening (rules tests, a11y, PWA tests, docs) | ⏳ next | spec §43                                |
 
-## What exists today (Phase 0–6)
+## What exists today (Phase 0–7)
 
 - React 18 + TypeScript strict + Vite 5 PWA (installable, offline app shell, update prompt)
 - Ant Design app shell with student navigation (Dashboard, My Projects)
@@ -52,6 +52,14 @@ Phase plans from spec §43. Detailed per-phase planning documents live at the re
   start them by deep-cloning the starter ERD into their own project (template untouched),
   and can initialize their local DB from the starter SQL. Authorization enforced in
   Firestore rules (lecturer role server-side)
+- Submissions & lecturer review (Phase 7): students submit immutable logical snapshots —
+  blocking validation errors abort first, the SQLite snapshot (kind `submission`, retained
+  forever) is created before the submission document (no partial submissions), the ERD is
+  frozen via deep clone, resubmission bumps the version while the project stays editable.
+  Lecturers filter submissions per assignment, inspect the frozen ERD with validation
+  issues, restore the submitted SQLite into a throwaway local review project (browse + run
+  SQL in-browser, no server-side SQL), and grade with score + feedback. Rules restrict
+  submission updates to grading fields only
 
 ## Explicit non-goals (spec §38)
 
