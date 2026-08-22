@@ -35,7 +35,11 @@ npm run test:rules
 
 The suite is opt-in: without `FIRESTORE_EMULATOR_HOST` the rules tests skip
 themselves (CI without the emulator stays green; a plain TCP probe is NOT enough
-because port 8080 can host unrelated services). Coverage: users role documents,
+because port 8080 can host unrelated services). If port 8080 is taken, start the
+emulator with a git-ignored override config (e.g. `firebase.emulator.local.json`
+with `firestore.port: 8081`) via `firebase emulators:start --config <file>` and
+point `FIRESTORE_EMULATOR_HOST` at that port. The suite clears emulator data on
+startup, so it is safe to re-run back-to-back. Coverage: users role documents,
 project ownership, snapshot ownership/immutability, assignment publication
 visibility, submission ownership + grading-only updates.
 

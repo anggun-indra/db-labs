@@ -16,7 +16,7 @@ import {
   initializeTestEnvironment,
   type RulesTestEnvironment
 } from '@firebase/rules-unit-testing'
-import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore'
+import { Bytes, doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore'
 
 const emulatorEnv = process.env.FIRESTORE_EMULATOR_HOST ?? ''
 const [EMULATOR_HOST, EMULATOR_PORT_RAW] = emulatorEnv.split(':')
@@ -55,14 +55,17 @@ describe.skipIf(!canRun)('Firestore security rules (emulator)', () => {
         port: EMULATOR_PORT
       }
     })
+    // The emulator keeps data across runs; a stale doc would turn a create
+    // into an update and skew the suite. Always start clean.
+    await env.clearFirestore()
   }, 30000)
 
   afterAll(async () => {
     if (env) await testEnv().cleanup()
   })
 
-  const studentDoc = (ownerUid: string) => ({
-    projectId: 'p1',
+  const studentDoc = (ownerUid: string, projectId = 'p1') => ({
+    projectId,
     ownerUid,
     name: 'My ERD',
     createdAt: '2024-01-01T00:00:00.000Z',
@@ -89,12 +92,12 @@ describe.skipIf(!canRun)('Firestore security rules (emulator)', () => {
 
   it('denies creating a project owned by someone else', async () => {
     const alice = testEnv().authenticatedContext('uid-a')
-    await assertFails(setDoc(doc(alice.firestore(), 'projects/p2'), studentDoc('uid-b')))
+    await assertFails(setDoc(doc(alice.firestore(), 'projects/p2'), studentDoc('uid-b', 'p2')))
   })
 
   it('denies reading or deleting another student\'s project', async () => {
     const alice = testEnv().authenticatedContext('uid-a')
-    await assertSucceeds(setDoc(doc(alice.firestore(), 'projects/p3'), studentDoc('uid-a')))
+    await assertSucceeds(setDoc(doc(alice.firestore(), 'projects/p3'), studentDoc('uid-a', 'p3')))
 
     const bob = testEnv().authenticatedContext('uid-b')
     await assertFails(getDoc(doc(bob.firestore(), 'projects/p3')))
@@ -167,7 +170,7 @@ describe.skipIf(!canRun)('Firestore security rules (emulator)', () => {
     await assertSucceeds(
       setDoc(doc(alice.firestore(), 'sqliteSnapshots/snap-a/chunks/0'), {
         index: 0,
-        data: new Uint8Array([1, 2, 3])
+        data: Bytes.fromUint8Array(new Uint8Array([1, 2, 3]))
       })
     )
     await assertSucceeds(getDoc(doc(alice.firestore(), 'sqliteSnapshots/snap-a/chunks/0')))
@@ -187,7 +190,7 @@ describe.skipIf(!canRun)('Firestore security rules (emulator)', () => {
     await assertFails(
       setDoc(doc(bob.firestore(), 'sqliteSnapshots/snap-b/chunks/0'), {
         index: 0,
-        data: new Uint8Array([9])
+        data: Bytes.fromUint8Array(new Uint8Array([9]))
       })
     )
     await assertFails(deleteDoc(doc(bob.firestore(), 'sqliteSnapshots/snap-b')))
@@ -222,8 +225,8 @@ describe.skipIf(!canRun)('Firestore security rules (emulator)', () => {
     })
   }
 
-  const assignmentDoc = (createdByUid: string, status: string) => ({
-    assignmentId: 'asg-1',
+  const assignmentDoc = (createdByUid: string, status: string, assignmentId = 'asg-1') => ({
+    assignmentId,
     courseId: 'c1',
     title: 'Marketplace Database',
     description: '',
@@ -263,17 +266,17 @@ describe.skipIf(!canRun)('Firestore security rules (emulator)', () => {
     await seedLecturer('lec-1')
     const lecturer = testEnv().authenticatedContext('lec-1')
     await assertSucceeds(
-      setDoc(doc(lecturer.firestore(), 'assignments/asg-pub'), assignmentDoc('lec-1', 'published'))
+      setDoc(doc(lecturer.firestore(), 'assignments/asg-pub'), assignmentDoc('lec-1', 'published', 'asg-pub'))
     )
     await assertSucceeds(
-      setDoc(doc(lecturer.firestore(), 'assignments/asg-draft'), assignmentDoc('lec-1', 'draft'))
+      setDoc(doc(lecturer.firestore(), 'assignments/asg-draft'), assignmentDoc('lec-1', 'draft', 'asg-draft'))
     )
 
     const student = testEnv().authenticatedContext('uid-a')
     await assertSucceeds(getDoc(doc(student.firestore(), 'assignments/asg-pub')))
     await assertFails(getDoc(doc(student.firestore(), 'assignments/asg-draft')))
     await assertFails(
-      setDoc(doc(student.firestore(), 'assignments/asg-x'), assignmentDoc('uid-a', 'published'))
+      setDoc(doc(student.firestore(), 'assignments/asg-x'), assignmentDoc('uid-a', 'published', 'asg-x'))
     )
   })
 
@@ -282,24 +285,29 @@ describe.skipIf(!canRun)('Firestore security rules (emulator)', () => {
     await seedLecturer('lec-2')
     const lecturer1 = testEnv().authenticatedContext('lec-1')
     await assertSucceeds(
-      setDoc(doc(lecturer1.firestore(), 'assignments/asg-own'), assignmentDoc('lec-1', 'draft'))
+      setDoc(doc(lecturer1.firestore(), 'assignments/asg-own'), assignmentDoc('lec-1', 'draft', 'asg-own'))
     )
     // Cannot create an assignment owned by another lecturer.
     await assertFails(
-      setDoc(doc(lecturer1.firestore(), 'assignments/asg-other'), assignmentDoc('lec-2', 'draft'))
+      setDoc(doc(lecturer1.firestore(), 'assignments/asg-other'), assignmentDoc('lec-2', 'draft', 'asg-other'))
     )
 
     const lecturer2 = testEnv().authenticatedContext('lec-2')
     await assertFails(deleteDoc(doc(lecturer2.firestore(), 'assignments/asg-own')))
     await assertFails(
-      setDoc(doc(lecturer2.firestore(), 'assignments/asg-own'), assignmentDoc('lec-1', 'archived'))
+      setDoc(doc(lecturer2.firestore(), 'assignments/asg-own'), assignmentDoc('lec-1', 'archived', 'asg-own'))
     )
   })
 
   /* Phase 7: submissions */
 
-  const submissionDoc = (studentUid: string, version = 1, status = 'submitted') => ({
-    submissionId: 'sub-1',
+  const submissionDoc = (
+    studentUid: string,
+    version = 1,
+    status = 'submitted',
+    submissionId = 'sub-1'
+  ) => ({
+    submissionId,
     assignmentId: 'asg-1',
     courseId: 'c1',
     projectId: 'p1',
@@ -318,12 +326,12 @@ describe.skipIf(!canRun)('Firestore security rules (emulator)', () => {
   it('students create and read only their own submissions', async () => {
     const student = testEnv().authenticatedContext('uid-a')
     await assertSucceeds(
-      setDoc(doc(student.firestore(), 'submissions/sub-own'), submissionDoc('uid-a'))
+      setDoc(doc(student.firestore(), 'submissions/sub-own'), submissionDoc('uid-a', 1, 'submitted', 'sub-own'))
     )
     await assertSucceeds(getDoc(doc(student.firestore(), 'submissions/sub-own')))
     // Cannot submit on someone else's behalf.
     await assertFails(
-      setDoc(doc(student.firestore(), 'submissions/sub-other'), submissionDoc('uid-b'))
+      setDoc(doc(student.firestore(), 'submissions/sub-other'), submissionDoc('uid-b', 1, 'submitted', 'sub-other'))
     )
     // Cannot read someone else's submission.
     await assertFails(getDoc(doc(student.firestore(), 'submissions/sub-other')))
@@ -332,16 +340,16 @@ describe.skipIf(!canRun)('Firestore security rules (emulator)', () => {
   it('students cannot grade their own submission or change frozen fields', async () => {
     const student = testEnv().authenticatedContext('uid-a')
     await assertSucceeds(
-      setDoc(doc(student.firestore(), 'submissions/sub-own'), submissionDoc('uid-a'))
+      setDoc(doc(student.firestore(), 'submissions/sub-grade'), submissionDoc('uid-a', 1, 'submitted', 'sub-grade'))
     )
     await assertFails(
-      setDoc(doc(student.firestore(), 'submissions/sub-own'), {
-        ...submissionDoc('uid-a'),
+      setDoc(doc(student.firestore(), 'submissions/sub-grade'), {
+        ...submissionDoc('uid-a', 1, 'submitted', 'sub-grade'),
         score: 100,
         status: 'graded'
       })
     )
-    await assertFails(deleteDoc(doc(student.firestore(), 'submissions/sub-own')))
+    await assertFails(deleteDoc(doc(student.firestore(), 'submissions/sub-grade')))
   })
 
   it('lecturers update grading fields only, never the frozen payload', async () => {
