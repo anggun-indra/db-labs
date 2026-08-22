@@ -8,6 +8,7 @@ import {
   ConsoleSqlOutlined,
   DatabaseOutlined,
   FormOutlined,
+  SettingOutlined,
   UserOutlined,
   WifiOutlined
 } from '@ant-design/icons'
@@ -40,9 +41,11 @@ export function AppLayout() {
       ? '/projects'
       : location.pathname.startsWith('/assignments')
         ? '/assignments'
-        : location.pathname.startsWith('/profile')
-          ? '/profile'
-          : '/'
+        : location.pathname.startsWith('/settings')
+          ? '/settings'
+          : location.pathname.startsWith('/profile')
+            ? '/profile'
+            : '/'
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -51,14 +54,15 @@ export function AppLayout() {
         collapsed={collapsed}
         onCollapse={setCollapsed}
         breakpoint="lg"
-        theme="dark"
+        theme="light"
+        className="app-sider"
       >
         <div className="app-logo">
-          <DatabaseOutlined style={{ fontSize: 22, color: '#fff' }} />
+          <DatabaseOutlined className="app-logo__icon" />
           {!collapsed && <span className="app-logo__text">Database Learning Lab</span>}
         </div>
         <Menu
-          theme="dark"
+          theme="light"
           mode="inline"
           selectedKeys={[selectedKey]}
           items={[
@@ -88,6 +92,12 @@ export function AppLayout() {
                   : undefined
             },
             {
+              key: '/settings',
+              icon: <SettingOutlined />,
+              label: <Link to="/settings">Settings</Link>,
+              title: 'Appearance and connection settings'
+            },
+            {
               key: '/profile',
               icon: <UserOutlined />,
               label: <Link to="/profile">Profile</Link>,
@@ -101,7 +111,7 @@ export function AppLayout() {
       </Sider>
       <Layout>
         <Header className="app-header">
-          <Typography.Text style={{ color: '#fff' }}>
+          <Typography.Text className="app-header__title">
             Manajemen Database — Database Management for Digital Business
           </Typography.Text>
           <Space>
@@ -115,14 +125,14 @@ export function AppLayout() {
             </Tag>
             {mode === 'firebase' &&
               (user ? (
-                <Link to="/profile" style={{ color: '#fff' }}>
+                <Link to="/profile" className="app-header__link">
                   <Space size={6}>
                     <Avatar size="small" src={user.photoURL ?? undefined} icon={<UserOutlined />} />
                     <span>{user.displayName || user.email || 'Account'}</span>
                   </Space>
                 </Link>
               ) : (
-                <Link to="/profile" style={{ color: '#fff' }}>
+                <Link to="/profile" className="app-header__link">
                   <Space size={6}>
                     <CloudOutlined />
                     <span>Sign in</span>

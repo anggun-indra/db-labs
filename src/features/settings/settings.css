@@ -1,0 +1,164 @@
+/* Settings page — mirrors the DeepSeek harness settings dialog structure:
+ * left nav rail + panel; Appearance theme cubes reproduce the dsw
+ * theme-picker visuals (see docs/design/reference/dsw-theme-extracted.css). */
+
+.dsw-settings {
+  display: flex;
+  gap: 24px;
+  max-width: 980px;
+  margin: 0 auto;
+  align-items: flex-start;
+}
+
+.dsw-settings__rail {
+  width: 210px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: sticky;
+  top: 16px;
+}
+
+.dsw-settings__rail-title {
+  font: var(--dsw-font-l-20, 500 20px/28px var(--dsw-font-family));
+  color: var(--dsw-alias-label-primary);
+  padding: 4px 12px 12px;
+}
+
+.dsw-settings__nav-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 14px;
+  line-height: 22px;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--ds-transition-duration-fast, 0.1s) var(--ds-ease-in-out);
+}
+
+.dsw-settings__nav-cell:hover {
+  background: var(--dsw-alias-interactive-bg-hover, rgba(15, 17, 21, 0.05));
+}
+
+.dsw-settings__nav-cell--active {
+  background: var(--dsw-alias-bg-module-platform, var(--dsw-static-neutral-bluish-60));
+  color: var(--dsw-alias-label-primary);
+}
+
+.dsw-settings__nav-icon {
+  display: inline-flex;
+  font-size: 16px;
+}
+
+.dsw-settings__panel {
+  flex: 1;
+  min-width: 0;
+  background: var(--dsw-alias-bg-layer-1);
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 12px;
+  box-shadow: var(--dsw-shadow-lv1);
+}
+
+.dsw-settings__content {
+  padding: 20px 24px;
+}
+
+.dsw-settings__group {
+  border-bottom: 1px solid var(--dsw-alias-border-l2);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 0;
+}
+
+.dsw-settings__group:last-child {
+  border-bottom: none;
+}
+
+.dsw-settings__group-title {
+  color: var(--dsw-alias-label-primary);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+}
+
+/* Theme cubes — same geometry as the dsw theme picker. */
+
+.dsw-theme-cube__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.dsw-theme-cube {
+  box-sizing: border-box;
+  border: 1px solid var(--dsw-alias-border-l2);
+  font: inherit;
+  color: var(--dsw-alias-label-primary);
+  cursor: pointer;
+  background: transparent;
+  border-radius: 16px;
+  display: flex;
+  flex: 180px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 32px;
+  font-size: 14px;
+  line-height: 22px;
+  transition: background var(--ds-transition-duration-fast, 0.1s) var(--ds-ease-in-out);
+}
+
+.dsw-theme-cube:hover:not(.dsw-theme-cube--selected) {
+  background: var(--dsw-alias-interactive-bg-hover, rgba(15, 17, 21, 0.05));
+}
+
+.dsw-theme-cube--selected {
+  background: var(--dsw-alias-bg-module-platform, var(--dsw-static-neutral-bluish-60));
+  border-color: var(--dsw-static-neutral-bluish-400);
+}
+
+.dsw-theme-cube__swatch {
+  width: 72px;
+  height: 44px;
+  border-radius: 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  display: block;
+}
+
+.dsw-theme-cube__swatch--light {
+  background:
+    linear-gradient(180deg, #ffffff 55%, #f5f6f7 55%);
+}
+
+.dsw-theme-cube__swatch--dark {
+  background:
+    linear-gradient(180deg, #151517 55%, #232325 55%);
+}
+
+.dsw-theme-cube__swatch--system {
+  background:
+    linear-gradient(105deg, #ffffff 49.7%, #151517 50.3%);
+}
+
+@media (max-width: 720px) {
+  .dsw-settings {
+    flex-direction: column;
+  }
+  .dsw-settings__rail {
+    width: 100%;
+    position: static;
+    flex-direction: row;
+  }
+  .dsw-settings__rail-title {
+    display: none;
+  }
+}
