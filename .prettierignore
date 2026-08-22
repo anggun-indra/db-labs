@@ -1,0 +1,10 @@
+node_modules
+dist
+dev-dist
+coverage
+playwright-report
+test-results
+package-lock.json
+*.tsbuildinfo
+public/pwa-192x192.png
+public/pwa-512x512.png
