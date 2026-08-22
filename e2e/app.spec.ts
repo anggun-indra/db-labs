@@ -27,6 +27,8 @@ test.describe('app boot and project lifecycle', () => {
     await expect(page.getByLabel('Project name')).toHaveValue('E2E Coffee Shop')
 
     await page.getByRole('button', { name: /Add table/i }).click()
+    // Close the inspector drawer so it cannot cover toolbar buttons.
+    await page.keyboard.press('Escape')
     await expect(page.getByTestId('table-node-header').first()).toBeVisible()
 
     // Reload keeps the project (local persistence acceptance, spec §53).
@@ -46,6 +48,8 @@ test.describe('app boot and project lifecycle', () => {
     await dialog.getByRole('button', { name: /Create/i }).click()
 
     await page.getByRole('button', { name: /Add table/i }).click()
+    // Close the inspector drawer so it cannot cover toolbar buttons.
+    await page.keyboard.press('Escape')
     await expect(page.getByTestId('table-node-header')).toHaveCount(1)
 
     await page.getByRole('button', { name: 'Undo' }).click()

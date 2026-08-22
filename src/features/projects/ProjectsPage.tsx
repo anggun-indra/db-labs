@@ -10,13 +10,17 @@ import {
 } from '@ant-design/icons'
 import { projectRepository, type ProjectSummary } from '@/lib/persistence/localProjectRepository'
 import { createProject } from '@/features/erd/domain/factory'
+import { useAuthStore } from '@/stores/authStore'
+import { getProjectSync } from '@/lib/firebase/syncInstance'
 
 /**
- * Project list (My Projects). Phase 1 keeps everything local; from Phase 4
- * this screen also shows Firestore-synced projects (spec §18).
+ * Project list (My Projects). Local-first; when signed in, projects are
+ * hydrated from Firestore on mount and every create/rename/delete is
+ * mirrored to the cloud with debounced write-behind sync (Phase 4).
  */
 export function ProjectsPage() {
   const navigate = useNavigate()
+  const user = useAuthStore((s) => s.user)
   const [projects, setProjects] = useState<ProjectSummary[]>([])
   const [loaded, setLoaded] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
@@ -32,8 +36,16 @@ export function ProjectsPage() {
   }, [])
 
   useEffect(() => {
-    void refresh()
-  }, [refresh])
+    let cancelled = false
+    // Signed in: hydrate from Firestore first, then list. Local mode skips.
+    void (async () => {
+      if (user) await getProjectSync().pullAndMerge()
+      if (!cancelled) await refresh()
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [user, refresh])
 
   const handleCreate = useCallback(async () => {
     const name = createName.trim() || 'Untitled ERD'
@@ -41,6 +53,7 @@ export function ProjectsPage() {
     try {
       const project = createProject(name)
       await projectRepository.saveProject(project)
+      getProjectSync().schedulePush(project.projectId)
       setCreateOpen(false)
       setCreateName('')
       navigate(`/projects/${project.projectId}/erd`)
@@ -52,6 +65,7 @@ export function ProjectsPage() {
   const handleDelete = useCallback(
     async (id: string) => {
       await projectRepository.deleteProject(id)
+      await getProjectSync().deleteRemote(id)
       await refresh()
     },
     [refresh]
@@ -63,6 +77,7 @@ export function ProjectsPage() {
     if (project) {
       project.name = renameName.trim() || project.name
       await projectRepository.saveProject(project)
+      getProjectSync().schedulePush(project.projectId)
     }
     setRenameTarget(null)
     await refresh()

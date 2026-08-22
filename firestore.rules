@@ -1,0 +1,47 @@
+rules_version = '2';
+
+// Database Learning Lab — Firestore security rules (Phase 4).
+// Principles (spec §28, §35, §39):
+//  - Firebase UID is the canonical identity; no anonymous writes.
+//  - Students own their projects: CRUD only on documents where
+//    ownerUid == request.auth.uid.
+//  - Roles are granted server-side: a client can only CREATE its own user
+//    document with role 'student', and can never change the role field
+//    afterwards (lecturer grants happen out-of-band in the console/API).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    match /users/{uid} {
+      // A user may read and update their own profile, but the role field
+      // is frozen after creation (server-side role enforcement).
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.role == 'student';
+      allow update: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.role == resource.data.role;
+      allow delete: if false;
+    }
+
+    match /projects/{projectId} {
+      allow read, delete: if signedIn()
+        && resource.data.ownerUid == request.auth.uid;
+      allow create: if signedIn()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.projectId == projectId;
+      allow update: if signedIn()
+        && resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerUid == request.auth.uid;
+    }
+
+    // Phase 5+ collections (snapshots, assignments, submissions) get their
+    // rules added in their own phases; deny by default until then.
+  }
+}

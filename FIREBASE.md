@@ -35,6 +35,31 @@ runs in **local mode** when unconfigured — Phases 0/1 never require Firebase.
 The public web config is safe in frontend code by design; authorization is enforced by
 Firebase Auth + Firestore Security Rules, never by trusting client state (see SECURITY.md).
 
+## Phase 4: Auth + project sync
+
+- Sign-in: Google popup (primary) plus email/password fallback, on the `/profile` page.
+- Identity: the Firebase UID is canonical; roles (`student`/`lecturer`) live in
+  `users/{uid}.role` and can only be granted server-side (rules reject client role changes).
+- Sync: local storage stays the source of truth; `ProjectSyncService` mirrors ERD/project
+  metadata to `projects/{projectId}` write-behind — 5 s debounce per project, immediate
+  flush on navigation/logout, offline queueing with automatic retry on reconnect.
+- Conflicts: last-write-wins by `updatedAt`; a remote document older than the local copy is
+  skipped, never silently overwriting newer local work.
+- Quota discipline: no live listeners, no `orderBy` on the owner query (avoids composite
+  index requirements), one pull on the project list when signed in.
+- SQLite bytes never sync here — the database remains fully in-browser until the explicit
+  Phase 5 snapshot flow.
+
+### Emulator & rules tests
+
+```bash
+firebase emulators:start --only auth,firestore
+npm run test:rules   # runs firestoreRules tests against FIRESTORE_EMULATOR_HOST
+```
+
+`firestore.rules` enforces ownership for `users` and `projects`; deployment is
+`firebase deploy --only firestore:rules,hosting`.
+
 ## Quota discipline (Spark)
 
 Per spec §48:

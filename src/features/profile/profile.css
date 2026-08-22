@@ -1,0 +1,10 @@
+.profile-page {
+  display: flex;
+  justify-content: center;
+  padding-top: 24px;
+}
+
+.profile-card {
+  width: 100%;
+  max-width: 560px;
+}

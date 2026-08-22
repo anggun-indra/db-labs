@@ -9,6 +9,7 @@ import type {
 } from '@/features/erd/domain/schema'
 import { createTable, duplicateTable as duplicateTableFactory } from '@/features/erd/domain/factory'
 import { projectRepository } from '@/lib/persistence/localProjectRepository'
+import { getProjectSync } from '@/lib/firebase/syncInstance'
 
 /**
  * ERD editor state (spec §19: Zustand -> local persistence -> dirty -> save).
@@ -118,6 +119,8 @@ export function flushAutosave(): Promise<void> {
     .saveProject(project)
     .then(() => {
       useErdEditorStore.setState({ saveStatus: 'saved' })
+      // Write-behind cloud sync (Phase 4): debounced, no-op in local mode.
+      getProjectSync().schedulePush(project.projectId)
     })
     .catch((error) => {
       console.error('Autosave failed:', error)
@@ -193,9 +196,13 @@ export const useErdEditorStore = create<ErdEditorState & InternalFields>()((set,
         autosaveTimer = undefined
         // Leaving the page must not drop unsaved edits (spec §19 autosave).
         if (project && saveStatus === 'dirty') {
-          void projectRepository.saveProject(project).catch((error) => {
-            console.error('Autosave on close failed:', error)
-          })
+          const projectId = project.projectId
+          void projectRepository
+            .saveProject(project)
+            .then(() => getProjectSync().pushNow(projectId))
+            .catch((error) => {
+              console.error('Autosave on close failed:', error)
+            })
         }
       }
       set({

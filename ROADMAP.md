@@ -1,7 +1,7 @@
 # Roadmap
 
 Phase plans from spec §43. Detailed per-phase planning documents live at the repo root
-(`phase-*.md`). Status as of Phase 3 completion.
+(`phase-*.md`). Status as of Phase 4 completion.
 
 | Phase | Scope                                          | Status  | Planning doc                            |
 | ----- | ---------------------------------------------- | ------- | --------------------------------------- |
@@ -9,14 +9,13 @@ Phase plans from spec §43. Detailed per-phase planning documents live at the re
 | 1     | Local ERD designer                             | ✅ done | spec §43                                |
 | 2     | SQLite generation (DDL + WASM runtime)         | ✅ done | `phase-2-sqlite-generation.md`          |
 | 3     | SQL Playground                                 | ✅ done | `phase-3-sql-playground.md`             |
-| 4     | Firebase Auth + project sync                   | ⏳ next | `phase-4-firebase-auth-projects.md`     |
-| 4     | Firebase Auth + project sync                   | planned | `phase-4-firebase-auth-projects.md`     |
-| 5     | SQLite snapshots via Firestore chunking        | planned | `phase-5-firestore-sqlite-snapshots.md` |
+| 4     | Firebase Auth + project sync                   | ✅ done | `phase-4-firebase-auth-projects.md`     |
+| 5     | SQLite snapshots via Firestore chunking        | ⏳ next | `phase-5-firestore-sqlite-snapshots.md` |
 | 6     | Courses & assignments                          | planned | `phase-6-assignments.md`                |
 | 7     | Submission + lecturer review                   | planned | `phase-7-submission-lecturer-review.md` |
 | 8     | Hardening (rules tests, a11y, PWA tests, docs) | planned | spec §43                                |
 
-## What exists today (Phase 0+1+2+3)
+## What exists today (Phase 0–4)
 
 - React 18 + TypeScript strict + Vite 5 PWA (installable, offline app shell, update prompt)
 - Ant Design app shell with student navigation (Dashboard, My Projects)
@@ -37,7 +36,11 @@ Phase plans from spec §43. Detailed per-phase planning documents live at the re
   script, Ctrl/Cmd+Enter, per-project draft, result table with 500-row render cap, copy/CSV
   export, timing and affected rows, per-project history with re-run, visual row editor
   (add/edit/delete with generated SQL shown), rule-based SQLite error hints
-- Firebase config scaffold (local mode until configured); no Firebase runtime dependency yet
+- Firebase Auth (Google + email/password) with Firestore project sync behind a
+  local-first write-behind layer: 5 s debounced pushes, offline queueing with automatic
+  retry, last-write-wins pull merge that never overwrites newer local work, profile
+  documents with server-side role grants, `firestore.rules` + emulator rules tests,
+  Firebase Hosting config; local mode stays 100% functional without any Firebase setup
 
 ## Explicit non-goals (spec §38)
 

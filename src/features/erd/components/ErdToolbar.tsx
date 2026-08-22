@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useSyncExternalStore } from 'react'
 import { Link } from 'react-router-dom'
 import { Button, Input, Space, Tag, Tooltip } from 'antd'
 import {
@@ -14,6 +14,9 @@ import {
 import { useReactFlow } from '@xyflow/react'
 import { useErdEditorStore } from '@/stores/erdEditorStore'
 import type { SaveStatus } from '@/stores/erdEditorStore'
+import { useAuthStore } from '@/stores/authStore'
+import { getProjectSync } from '@/lib/firebase/syncInstance'
+import type { SyncState } from '@/lib/firebase/projectSync'
 
 const saveStatusConfig: Record<SaveStatus, { color: string; label: string }> = {
   saved: { color: 'success', label: 'Saved' },
@@ -22,9 +25,19 @@ const saveStatusConfig: Record<SaveStatus, { color: string; label: string }> = {
   offline: { color: 'default', label: 'Offline' }
 }
 
+const syncStatusConfig: Record<SyncState, { color: string; label: string } | null> = {
+  idle: null,
+  pending: { color: 'default', label: 'Sync pending' },
+  syncing: { color: 'processing', label: 'Syncing…' },
+  synced: { color: 'success', label: 'Synced' },
+  offline: { color: 'warning', label: 'Offline — syncs later' },
+  error: { color: 'error', label: 'Sync error' }
+}
+
 /**
- * Editor toolbar: project name, save status, add table, undo/redo, view
- * controls. Save status display is required by spec §19.
+ * Editor toolbar: project name, save status, cloud sync status (Phase 4),
+ * add table, undo/redo, view controls. Save status display is required by
+ * spec §19; the sync tag mirrors the write-behind Firestore status.
  */
 export function ErdToolbar({ projectId }: { projectId?: string }) {
   const projectName = useErdEditorStore((s) => s.project?.name ?? '')
@@ -35,6 +48,14 @@ export function ErdToolbar({ projectId }: { projectId?: string }) {
   const addTable = useErdEditorStore((s) => s.addTable)
   const undo = useErdEditorStore((s) => s.undo)
   const redo = useErdEditorStore((s) => s.redo)
+  const user = useAuthStore((s) => s.user)
+  const authMode = useAuthStore((s) => s.mode)
+
+  const sync = getProjectSync()
+  const syncStatus = useSyncExternalStore(
+    (cb) => sync.subscribe(cb),
+    () => sync.getStatus()
+  )
 
   const { screenToFlowPosition, zoomIn, zoomOut, fitView } = useReactFlow()
 
@@ -65,6 +86,15 @@ export function ErdToolbar({ projectId }: { projectId?: string }) {
           aria-label="Project name"
         />
         <Tag color={status.color}>{status.label}</Tag>
+        {authMode === 'firebase' && user && syncStatusConfig[syncStatus.state] && (
+          <Tag
+            color={syncStatusConfig[syncStatus.state]!.color}
+            title={syncStatus.message}
+            data-testid="sync-status"
+          >
+            {syncStatusConfig[syncStatus.state]!.label}
+          </Tag>
+        )}
       </Space>
 
       <Space size="small">
