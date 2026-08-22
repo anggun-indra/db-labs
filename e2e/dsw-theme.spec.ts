@@ -156,10 +156,10 @@ test.describe('dsw design system regression', () => {
   test('header shows the Database Management Labs title and a version tag', async ({ page }) => {
     await page.goto('/')
     await expect(page.locator('.app-header__title')).toHaveText('Database Management Labs')
-    const version = await page.locator('.app-sider__version').textContent()
-    expect(version ?? '').toMatch(/^v\d+\.\d+\.\d+$/)
+    const version = await page.locator('.app-header__version').textContent()
+    expect((version ?? '').trim()).toMatch(/^v\d+\.\d+\.\d+$/)
     // The same tag is reported in Settings > General.
     await page.goto('/settings')
-    await expect(page.getByText(`v${version!.slice(1)}`).first()).toBeVisible()
+    await expect(page.getByText(`v${version!.trim().slice(1)}`).first()).toBeVisible()
   })
 })

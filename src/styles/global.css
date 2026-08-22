@@ -108,6 +108,27 @@ body {
   height: 36px;
 }
 
+/* Collapsed rail toggle: show the brand mark, swap to the panel icon on hover
+ * to signal "expand" — the dsh railMark ↔ panelIcon behaviour. */
+.app-sider__toggle--rail .app-sider__rail-mark,
+.app-sider__toggle--rail .app-sider__panel-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-sider__toggle--rail .app-sider__panel-icon {
+  display: none;
+}
+
+.app-sider__toggle--rail:hover .app-sider__rail-mark {
+  display: none;
+}
+
+.app-sider__toggle--rail:hover .app-sider__panel-icon {
+  display: inline-flex;
+}
+
 /* Foot area — Settings pinned to the bottom (dsh footArea + settings trigger:
  * 42px cell, radius 12, icon + label; circular 36px rail cell when collapsed). */
 .app-sider__foot {
@@ -156,15 +177,12 @@ body {
   border-radius: 50%;
 }
 
-/* Version tag under Settings (advances with every deployment). */
-.app-sider__version {
-  text-align: center;
-  padding: 6px 0 2px;
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--dsw-alias-label-tertiary);
-  letter-spacing: 0.02em;
-  user-select: none;
+/* App title with an inline deployment version tag. */
+.app-header__title-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
 .app-header {
@@ -178,6 +196,21 @@ body {
 
 .app-header__title {
   color: var(--dsw-alias-label-primary);
+}
+
+.app-header__version {
+  flex: none;
+  margin: 0;
+  padding: 0 8px;
+  height: 20px;
+  line-height: 20px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--dsw-alias-brand-primary);
+  background: var(--dsw-alias-interactive-bg-hover, rgba(65, 118, 230, 0.1));
+  user-select: none;
 }
 
 .app-header__link {

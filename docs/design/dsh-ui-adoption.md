@@ -114,9 +114,12 @@ the bottom of the rail.
 - [x] Sidebar widened to the harness rail width **280px** (expanded) /
       **56px** (collapsed), matching the dsh `sidebar:280` constant and the
       icon-only collapsed rail.
-- [x] Harness-style collapse/expand: a round 28px icon button (dsh
-      `iconButton`) sits at the right of the 60px logo row; when collapsed the
-      brand mark itself becomes the expand button (dsh collapsed logoRow).
+- [x] Harness-style collapse/expand: the toggle uses the harness's own
+      **panel-left glyph** (`IconPanelLeftOutline16` → `PanelLeftIcon`, a rounded
+      frame with a divided left panel) instead of a fold/arrow icon. Expanded:
+      the panel icon sits at the right of the 60px logo row. Collapsed: the rail
+      shows the brand mark and swaps to the panel icon on hover, signalling
+      "expand" — the dsh `railMark` ↔ `panelIcon` behaviour.
 - [x] Settings moved out of the menu into the bottom **foot area** (dsh
       `footArea` + settings trigger): a 42px radius-12 cell with icon+label,
       collapsing to a 36px circular rail cell.
@@ -135,8 +138,9 @@ the bottom of the rail.
       "Manajemen Database — Database Management for Digital Business" to
       **Database Management Labs** (header strap).
 - [x] Version tag: build-time `__APP_VERSION__` injected from `package.json`
-      (`src/app/version.ts`), rendered as `vX.Y.Z` in the sidebar foot area and
-      Settings > General. `npm run deploy` bumps the patch number before
+      (`src/app/version.ts`), rendered as a small **`vX.Y.Z` tag beside the
+      header title** and in Settings > General. `npm run deploy` bumps the patch
+      number before
       building, so every deployment carries a fresh tag.
 - [x] e2e asserts the new title and a semver version tag in both the sidebar
       and Settings. All gates green; 12 screenshots refreshed with the new

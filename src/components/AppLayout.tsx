@@ -7,7 +7,6 @@ import {
   CloudOutlined,
   ConsoleSqlOutlined,
   FormOutlined,
-  MenuFoldOutlined,
   SettingOutlined,
   UserOutlined,
   WifiOutlined
@@ -15,6 +14,7 @@ import {
 import { isFirebaseConfigured } from '@/lib/firebase/config'
 import { useAuthStore } from '@/stores/authStore'
 import { AppLogo } from '@/components/AppLogo'
+import { PanelLeftIcon } from '@/components/icons/PanelLeftIcon'
 import { APP_VERSION } from '@/app/version'
 
 const { Header, Sider, Content } = Layout
@@ -68,11 +68,16 @@ export function AppLayout() {
           {collapsed ? (
             <button
               type="button"
-              className="app-sider__toggle"
+              className="app-sider__toggle app-sider__toggle--rail"
               aria-label="Expand sidebar"
               onClick={() => setCollapsed(false)}
             >
-              <AppLogo size={24} />
+              <span className="app-sider__rail-mark">
+                <AppLogo size={24} />
+              </span>
+              <span className="app-sider__panel-icon">
+                <PanelLeftIcon size={18} />
+              </span>
             </button>
           ) : (
             <>
@@ -86,7 +91,7 @@ export function AppLayout() {
                 aria-label="Collapse sidebar"
                 onClick={() => setCollapsed(true)}
               >
-                <MenuFoldOutlined />
+                <PanelLeftIcon size={18} />
               </button>
             </>
           )}
@@ -145,14 +150,18 @@ export function AppLayout() {
             <SettingOutlined className="app-sider__settings-icon" />
             {!collapsed && <span>Settings</span>}
           </Link>
-          {!collapsed && <div className="app-sider__version">v{APP_VERSION}</div>}
         </div>
       </Sider>
       <Layout>
         <Header className="app-header">
-          <Typography.Text className="app-header__title">
-            Database Management Labs
-          </Typography.Text>
+          <span className="app-header__title-wrap">
+            <Typography.Text className="app-header__title">
+              Database Management Labs
+            </Typography.Text>
+            <Tag className="app-header__version" bordered={false}>
+              v{APP_VERSION}
+            </Tag>
+          </span>
           <Space>
             {!online && (
               <Tag color="orange" icon={<WifiOutlined />}>
