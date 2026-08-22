@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { App, Tag, Typography } from 'antd'
+import { App, Space, Tag, Typography } from 'antd'
 import { CloudOutlined, SettingOutlined } from '@ant-design/icons'
 import { isFirebaseConfigured, firebaseConfig } from '@/lib/firebase/config'
 import { useThemeStore, type ThemeMode } from '@/stores/themeStore'
+import { APP_VERSION } from '@/app/version'
 import './settings.css'
 
 /**
@@ -63,6 +64,15 @@ function GeneralPanel() {
           Interface language follows the course material (English). Bahasa Indonesia support is on
           the roadmap.
         </Typography.Text>
+      </div>
+      <div className="dsw-settings__group">
+        <div className="dsw-settings__group-title">Version</div>
+        <Space size={8} align="center">
+          <Tag color="blue">v{APP_VERSION}</Tag>
+          <Typography.Text type="secondary">
+            The version tag advances with every new deployment.
+          </Typography.Text>
+        </Space>
       </div>
     </div>
   )

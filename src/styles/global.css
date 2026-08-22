@@ -156,6 +156,17 @@ body {
   border-radius: 50%;
 }
 
+/* Version tag under Settings (advances with every deployment). */
+.app-sider__version {
+  text-align: center;
+  padding: 6px 0 2px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary);
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
 .app-header {
   display: flex;
   align-items: center;

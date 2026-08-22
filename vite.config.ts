@@ -3,6 +3,14 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'node:path'
+import { readFileSync } from 'node:fs'
+
+// App version ships with every build; `npm run deploy` bumps the patch
+// number first so each deployment carries a fresh version tag (rendered in
+// the sidebar foot area and Settings > General).
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as {
+  version: string
+}
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -55,6 +63,9 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src')
     }
+  },
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version)
   },
   build: {
     rollupOptions: {

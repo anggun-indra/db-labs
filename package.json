@@ -21,7 +21,8 @@
     "seed:demo": "node scripts/seed-demo.mjs",
     "gates": "bash scripts/gates.sh",
     "dev:emulators": "vite --mode emulator",
-    "visual": "node scripts/visual-snapshots.mjs"
+    "visual": "node scripts/visual-snapshots.mjs",
+    "deploy": "npm version patch --no-git-tag-version && npm run build"
   },
   "dependencies": {
     "@ant-design/icons": "^5.5.1",

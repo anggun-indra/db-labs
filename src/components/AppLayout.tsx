@@ -6,7 +6,6 @@ import {
   AppstoreOutlined,
   CloudOutlined,
   ConsoleSqlOutlined,
-  DatabaseOutlined,
   FormOutlined,
   MenuFoldOutlined,
   SettingOutlined,
@@ -15,6 +14,8 @@ import {
 } from '@ant-design/icons'
 import { isFirebaseConfigured } from '@/lib/firebase/config'
 import { useAuthStore } from '@/stores/authStore'
+import { AppLogo } from '@/components/AppLogo'
+import { APP_VERSION } from '@/app/version'
 
 const { Header, Sider, Content } = Layout
 
@@ -71,12 +72,12 @@ export function AppLayout() {
               aria-label="Expand sidebar"
               onClick={() => setCollapsed(false)}
             >
-              <DatabaseOutlined style={{ color: 'var(--dsw-alias-brand-primary)' }} />
+              <AppLogo size={24} />
             </button>
           ) : (
             <>
               <Link to="/" className="app-logo__brand">
-                <DatabaseOutlined className="app-logo__icon" />
+                <AppLogo size={26} />
                 <span className="app-logo__text">DBLab</span>
               </Link>
               <button
@@ -144,12 +145,13 @@ export function AppLayout() {
             <SettingOutlined className="app-sider__settings-icon" />
             {!collapsed && <span>Settings</span>}
           </Link>
+          {!collapsed && <div className="app-sider__version">v{APP_VERSION}</div>}
         </div>
       </Sider>
       <Layout>
         <Header className="app-header">
           <Typography.Text className="app-header__title">
-            Manajemen Database — Database Management for Digital Business
+            Database Management Labs
           </Typography.Text>
           <Space>
             {!online && (

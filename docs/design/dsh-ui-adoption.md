@@ -123,3 +123,21 @@ the bottom of the rail.
 - [x] e2e locks the new shell: brand=DBLab, rail 280↔56px collapse/expand,
       Settings present in foot area and absent from the menu. All gates green;
       12 reference screenshots refreshed.
+
+## Branding: modern logo, product title, deployment version tag
+
+- [x] New DBLab logo: a modern gradient brand tile (deepseek-450 → 500) with a
+      white database cylinder plus an ERD-relation spark. Ships as
+      `public/logo.svg`, an inline `src/components/AppLogo.tsx` (crisp at any
+      size, used in the sidebar brand + collapsed expand button), the favicon,
+      and regenerated `pwa-192x192.png` / `pwa-512x512.png` icons.
+- [x] Application title changed from
+      "Manajemen Database — Database Management for Digital Business" to
+      **Database Management Labs** (header strap).
+- [x] Version tag: build-time `__APP_VERSION__` injected from `package.json`
+      (`src/app/version.ts`), rendered as `vX.Y.Z` in the sidebar foot area and
+      Settings > General. `npm run deploy` bumps the patch number before
+      building, so every deployment carries a fresh tag.
+- [x] e2e asserts the new title and a semver version tag in both the sidebar
+      and Settings. All gates green; 12 screenshots refreshed with the new
+      branding.
