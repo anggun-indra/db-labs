@@ -165,7 +165,7 @@ export function ProjectsPage() {
                   ]}
                 >
                   <Card.Meta
-                    avatar={<DatabaseOutlined style={{ fontSize: 24, color: '#1f3a5f' }} />}
+                    avatar={<DatabaseOutlined style={{ fontSize: 24, color: 'var(--dsw-alias-brand-primary)' }} />}
                     title={item.name}
                     description={`Last edited ${new Date(item.updatedAt).toLocaleString()}`}
                   />

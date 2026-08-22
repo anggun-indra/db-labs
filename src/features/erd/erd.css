@@ -1,4 +1,6 @@
-/* ERD editor styles (canvas, nodes, toolbar, panels). */
+/* ERD editor styles (canvas, nodes, toolbar, panels) — dsw token-driven.
+ * Theme-specific accent/border helpers live in src/styles/global.css
+ * (--dsw-erd-grid, --dsw-erd-accent, --dsw-erd-node-border). */
 
 .erd-editor {
   display: flex;
@@ -10,10 +12,10 @@
 .erd-editor__canvas {
   position: relative;
   flex: 1;
-  border: 1px solid #e3e9f2;
-  border-radius: 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
   overflow: hidden;
-  background: #fbfcfe;
+  background: var(--dsw-alias-bg-base);
 }
 
 .erd-editor__mobile-hint {
@@ -35,15 +37,16 @@
   gap: 12px;
   padding: 8px 12px;
   margin-bottom: 8px;
-  background: #fff;
-  border: 1px solid #e3e9f2;
-  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-1);
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
   flex-wrap: wrap;
 }
 
 .erd-toolbar__name {
   font-weight: 600;
   max-width: 260px;
+  color: var(--dsw-alias-label-primary);
 }
 
 /* Table node -------------------------------------------------------------- */
@@ -51,24 +54,25 @@
 .erd-table-node {
   min-width: 200px;
   max-width: 300px;
-  background: #fff;
-  border: 1.5px solid #b8c7dc;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(31, 58, 95, 0.08);
+  background: var(--dsw-alias-bg-layer-1);
+  border: 1.5px solid var(--dsw-erd-node-border);
+  border-radius: 12px;
+  box-shadow: var(--dsw-shadow-lv2);
   font-size: 12px;
+  color: var(--dsw-alias-label-primary);
 }
 
 .erd-table-node--selected {
-  border-color: #1f3a5f;
-  box-shadow: 0 0 0 3px rgba(31, 58, 95, 0.18);
+  border-color: var(--dsw-erd-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--dsw-erd-accent) 28%, transparent);
 }
 
 .erd-table-node__header {
   padding: 6px 10px;
-  background: #1f3a5f;
-  color: #fff;
+  background: var(--dsw-alias-brand-primary);
+  color: var(--dsw-alias-bg-base);
   font-weight: 600;
-  border-radius: 6px 6px 0 0;
+  border-radius: 10px 10px 0 0;
 }
 
 .erd-table-node__row {
@@ -77,21 +81,21 @@
   align-items: center;
   gap: 6px;
   padding: 3px 10px;
-  border-top: 1px solid #eef2f8;
+  border-top: 1px solid var(--dsw-alias-border-l1);
 }
 
 .erd-table-node__badges {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  color: #1f3a5f;
+  color: var(--dsw-erd-accent);
   min-width: 26px;
 }
 
 .erd-table-node__uq {
   font-size: 9px;
   font-weight: 700;
-  border: 1px solid #1f3a5f;
+  border: 1px solid var(--dsw-erd-accent);
   border-radius: 3px;
   padding: 0 2px;
 }
@@ -104,26 +108,26 @@
 }
 
 .erd-table-node__column-type {
-  color: #7b8aa0;
+  color: var(--dsw-alias-label-tertiary);
   font-size: 11px;
 }
 
 .erd-table-node__empty {
   padding: 8px 10px;
-  color: #98a4b8;
+  color: var(--dsw-alias-label-tertiary);
   font-style: italic;
 }
 
 .erd-table-node__placeholder {
-  color: #98a4b8;
+  color: var(--dsw-alias-label-tertiary);
   font-style: italic;
 }
 
 .erd-table-node__handle {
   width: 8px;
   height: 8px;
-  background: #1f3a5f;
-  border: 1.5px solid #fff;
+  background: var(--dsw-erd-accent);
+  border: 1.5px solid var(--dsw-alias-bg-base);
 }
 
 /* Validation panel --------------------------------------------------------- */
@@ -134,10 +138,10 @@
   bottom: 12px;
   width: 360px;
   max-width: calc(100% - 24px);
-  background: #fff;
-  border: 1px solid #e3e9f2;
-  border-radius: 8px;
-  box-shadow: 0 4px 14px rgba(31, 58, 95, 0.12);
+  background: var(--dsw-alias-bg-layer-1);
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
+  box-shadow: var(--dsw-shadow-lv2);
   z-index: 10;
   overflow: hidden;
 }
@@ -149,14 +153,15 @@
   width: 100%;
   padding: 8px 12px;
   border: none;
-  background: #fff;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
   cursor: pointer;
 }
 
 .validation-panel__body {
   max-height: 240px;
   overflow: auto;
-  border-top: 1px solid #eef2f8;
+  border-top: 1px solid var(--dsw-alias-border-l1);
   padding: 4px 8px;
 }
 
@@ -186,9 +191,9 @@
   gap: 6px;
   padding: 8px;
   margin-bottom: 8px;
-  background: #f7f9fc;
-  border: 1px solid #e8edf5;
-  border-radius: 6px;
+  background: var(--dsw-alias-bg-module-platform);
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
 }
 
 .table-inspector__column-row {

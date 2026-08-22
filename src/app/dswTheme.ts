@@ -60,14 +60,75 @@ export function buildDswThemeConfig(isDark: boolean): ThemeConfig {
         iconSize: 16
       },
       Card: {
-        borderRadiusLG: 12
+        borderRadiusLG: 12,
+        colorBorderSecondary: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+        paddingLG: 20
       },
       Button: {
         borderRadius: 8,
+        controlHeight: 34,
+        fontWeight: 400
+      },
+      Input: {
+        borderRadius: 8,
+        borderRadiusLG: 12,
         controlHeight: 34
       },
-      Modal: {
+      InputNumber: {
+        borderRadius: 8,
+        controlHeight: 34
+      },
+      Select: {
+        borderRadius: 8,
+        controlHeight: 34,
+        optionSelectedBg: isDark ? 'rgba(38,49,72,0.45)' : 'rgba(38,49,72,0.10)'
+      },
+      Table: {
+        headerBg: isDark ? '#1b1b1c' : '#f5f6f7',
+        headerColor: isDark ? '#adb2b8' : '#61666b',
+        headerSplitColor: 'transparent',
+        borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+        rowHoverBg: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(15,17,21,0.03)',
+        borderRadius: 12,
         borderRadiusLG: 12
+      },
+      Tabs: {
+        inkBarColor: isDark ? '#5686fe' : '#4176e6',
+        itemSelectedColor: isDark ? '#f9fafb' : '#0f1115',
+        itemHoverColor: isDark ? '#cfd3d6' : '#43454a',
+        titleFontSize: 14
+      },
+      Tag: {
+        borderRadiusSM: 6
+      },
+      Modal: {
+        borderRadiusLG: 16,
+        titleFontSize: 16
+      },
+      Drawer: {
+        colorBgElevated: isDark ? '#232324' : '#ffffff'
+      },
+      Segmented: {
+        borderRadius: 8,
+        itemSelectedBg: isDark ? '#353638' : '#ffffff',
+        trackBg: isDark ? '#1b1b1c' : '#f5f6f7'
+      },
+      Alert: {
+        borderRadiusLG: 12
+      },
+      Tooltip: {
+        borderRadius: 8,
+        colorBgSpotlight: isDark ? '#2c2c2e' : '#0f1115'
+      },
+      Message: {
+        borderRadiusLG: 12
+      },
+      Popconfirm: {
+        borderRadiusLG: 12
+      },
+      Dropdown: {
+        borderRadiusLG: 12,
+        controlItemBgHover: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,17,21,0.05)'
       }
     }
   }

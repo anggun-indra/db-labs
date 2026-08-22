@@ -37,12 +37,29 @@ Key mechanics reproduced exactly:
 - [x] Verified: gates green (incl. e2e), computed styles match dsw palette
       in both modes; screenshots in /tmp/dsw-*.png for visual review
 
+## Done (round 2) — component parity sweep
+
+- [x] Full AntD component token sweep in `dswTheme.ts`: Card/Table/Button/
+      Input/Select/Tabs/Tag/Modal/Drawer/Segmented/Alert/Tooltip/Dropdown/
+      Message — dsw radii (8/12/16), bluish neutrals, deepseek accents
+- [x] Settings geometry matched to the dsh settings plugin exactly
+      (panel radius 24, nav 188px, nav title 16/500, nav cell 40px, logo
+      row 60px, brand 18px/600/0.04em letter-spacing)
+- [x] Zero hardcoded hex/rgba left in `src` (excl. tokens.css + theme swatch
+      previews): ValidationPanel state icons, Badges, Projects/Database
+      avatars, SubmissionReviewDrawer selected row, all feature CSS
+      (erd/database/playground) now use dsw alias tokens
+- [x] ERD canvas + node chrome tokenized with per-theme helpers
+      (`--dsw-erd-grid/-accent/-node-border`); node header uses inverted
+      brand token so it flips light/dark like dsw
+- [x] Verified: full gates green; ERD editor computed colors match the dark
+      palette (toolbar #232324, canvas #151517, border-l1 white/12%)
+
 ## Next rounds (component parity backlog)
 
-1. Dashboard cards + stat tiles → dsw layer/border/shadow tokens
-2. Tables, forms, inputs, buttons across Projects/Assignments/Submissions
-3. Icon configuration: adopt dsh-style 16px outline icons across nav + toolbars
-4. Profile page restyle (cards, auth forms) to dsw tokens
-5. SQL Playground + ERD editor chrome (toolbars, drawers) token pass
-6. Modals/drawers/message styles (AntD component token sweep)
-7. Light/dark visual regression screenshots per page
+1. Icon configuration: adopt a single 16px outline icon style across nav +
+   toolbars; audit for filled/outlined mixing
+2. Profile page restyle (cards, auth forms) to dsw tokens
+3. SQL Playground + Database page chrome polish (panels, explorer, schema)
+4. Modals/drawers/message visual regression screenshots per page (light+dark)
+5. Empty states + illustrations aligned to dsw neutral style

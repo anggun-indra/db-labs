@@ -327,7 +327,7 @@ export function DatabasePage() {
         ) : (
           <div className="page-centered">
             <Result
-              icon={<FileAddOutlined style={{ color: '#1f3a5f' }} />}
+              icon={<FileAddOutlined style={{ color: 'var(--dsw-alias-brand-primary)' }} />}
               title="No database yet"
               subTitle="Generate a SQLite database from your ERD. You will see the exact CREATE TABLE statements before anything runs."
               extra={

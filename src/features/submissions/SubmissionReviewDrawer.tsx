@@ -154,7 +154,9 @@ export function SubmissionReviewDrawer({
               onClick={() => setSelected(submission)}
               style={{
                 cursor: 'pointer',
-                background: selected?.submissionId === submission.submissionId ? '#f0f5ff' : undefined,
+                background: selected?.submissionId === submission.submissionId
+                ? 'var(--dsw-alias-interactive-bg-active)'
+                : undefined,
                 padding: '8px 12px'
               }}
             >

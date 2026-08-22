@@ -1,6 +1,8 @@
 /* Settings page — mirrors the DeepSeek harness settings dialog structure:
- * left nav rail + panel; Appearance theme cubes reproduce the dsw
- * theme-picker visuals (see docs/design/reference/dsw-theme-extracted.css). */
+ * left nav rail + panel; geometry taken from the dsh settings plugin
+ * (panel radius 24, nav 188px, nav title 16/500, nav cell 40px).
+ * Appearance theme cubes reproduce the dsw theme-picker visuals
+ * (see docs/design/reference/dsw-theme-extracted.css). */
 
 .dsw-settings {
   display: flex;
@@ -11,30 +13,35 @@
 }
 
 .dsw-settings__rail {
-  width: 210px;
+  width: 188px;
   flex: none;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   position: sticky;
   top: 16px;
+  padding-top: 6px;
 }
 
 .dsw-settings__rail-title {
-  font: var(--dsw-font-l-20, 500 20px/28px var(--dsw-font-family));
   color: var(--dsw-alias-label-primary);
-  padding: 4px 12px 12px;
+  padding: 0 12px 12px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
 }
 
 .dsw-settings__nav-cell {
+  box-sizing: border-box;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
+  gap: 8px;
+  height: 40px;
+  padding: 0 10px 0 12px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 12px;
   background: transparent;
-  color: var(--dsw-alias-label-secondary);
+  color: var(--dsw-alias-label-primary);
   font-size: 14px;
   line-height: 22px;
   cursor: pointer;
@@ -54,19 +61,19 @@
 .dsw-settings__nav-icon {
   display: inline-flex;
   font-size: 16px;
+  color: var(--dsw-alias-label-secondary);
 }
 
 .dsw-settings__panel {
   flex: 1;
   min-width: 0;
-  background: var(--dsw-alias-bg-layer-1);
-  border: 1px solid var(--dsw-alias-border-l1);
-  border-radius: 12px;
-  box-shadow: var(--dsw-shadow-lv1);
+  background: var(--dsw-alias-bg-layer-2);
+  box-shadow: var(--dsw-shadow-lv3);
+  border-radius: 24px;
 }
 
 .dsw-settings__content {
-  padding: 20px 24px;
+  padding: 22px 24px;
 }
 
 .dsw-settings__group {

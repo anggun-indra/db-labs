@@ -187,7 +187,7 @@ export function ErdCanvas() {
       proOptions={{ hideAttribution: true }}
       className="erd-canvas"
     >
-      <Background variant={BackgroundVariant.Dots} gap={24} size={1.5} color="#c9d4e3" />
+      <Background variant={BackgroundVariant.Dots} gap={24} size={1.5} color="var(--dsw-erd-grid)" />
       <Controls position="bottom-right" />
       <MiniMap pannable zoomable position="top-right" />
     </ReactFlow>

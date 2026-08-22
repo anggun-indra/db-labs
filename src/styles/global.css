@@ -26,7 +26,8 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 16px 14px;
+  height: 60px;
+  padding: 8px 14px;
   overflow: hidden;
   white-space: nowrap;
 }
@@ -39,7 +40,9 @@ body {
 .app-logo__text {
   color: var(--dsw-alias-label-primary);
   font-weight: 600;
-  font-size: 14px;
+  font-size: 18px;
+  line-height: 24px;
+  letter-spacing: 0.04em;
 }
 
 .app-header {
@@ -86,4 +89,16 @@ body {
 
 .code-font {
   font-family: var(--ds-font-family-code);
+}
+
+/* ERD canvas helpers — token-driven so the canvas follows the theme. */
+body {
+  --dsw-erd-grid: var(--dsw-static-neutral-bluish-200);
+  --dsw-erd-accent: var(--dsw-static-deepseek-500);
+  --dsw-erd-node-border: var(--dsw-static-neutral-bluish-300);
+}
+body[data-ds-dark-theme] {
+  --dsw-erd-grid: var(--dsw-static-neutral-bluish-750);
+  --dsw-erd-accent: var(--dsw-static-deepseek-450);
+  --dsw-erd-node-border: var(--dsw-static-neutral-bluish-600);
 }

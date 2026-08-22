@@ -6,9 +6,9 @@ import type { ValidationIssue } from '@/features/erd/domain/schema'
 import { useErdEditorStore } from '@/stores/erdEditorStore'
 
 const severityIcon = {
-  error: <CloseCircleFilled style={{ color: '#ff4d4f' }} />,
-  warning: <ExclamationCircleFilled style={{ color: '#faad14' }} />,
-  info: <InfoCircleFilled style={{ color: '#1677ff' }} />
+  error: <CloseCircleFilled style={{ color: 'var(--dsw-alias-state-error-primary)' }} />,
+  warning: <ExclamationCircleFilled style={{ color: 'var(--dsw-alias-state-warn-primary)' }} />,
+  info: <InfoCircleFilled style={{ color: 'var(--dsw-static-deepseek-450)' }} />
 } as const
 
 const severityTagColor = {
@@ -41,8 +41,8 @@ export function ValidationPanel() {
       >
         <Space>
           <Typography.Text strong>Validation</Typography.Text>
-          <Badge count={errors} color="#ff4d4f" showZero={false} overflowCount={99} />
-          <Badge count={warnings} color="#faad14" showZero={false} overflowCount={99} />
+          <Badge count={errors} color="var(--dsw-alias-state-error-primary)" showZero={false} overflowCount={99} />
+          <Badge count={warnings} color="var(--dsw-alias-state-warn-primary)" showZero={false} overflowCount={99} />
           {issues.length === 0 && <Tag color="success">All good</Tag>}
         </Space>
         <Typography.Text type="secondary">{collapsed ? 'Show' : 'Hide'}</Typography.Text>

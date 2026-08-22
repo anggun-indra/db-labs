@@ -13,8 +13,8 @@
   flex-wrap: wrap;
   padding: 10px 14px;
   margin-bottom: 12px;
-  background: #fff;
-  border: 1px solid #e3e9f2;
+  background: var(--dsw-alias-bg-layer-1);
+  border: 1px solid var(--dsw-alias-border-l2);
   border-radius: 8px;
 }
 
@@ -58,12 +58,12 @@
 }
 
 .sql-editor__hint {
-  color: #6b7a90;
+  color: var(--dsw-alias-label-tertiary);
   font-size: 12px;
 }
 
 .sql-editor__monaco {
-  border: 1px solid #e3e9f2;
+  border: 1px solid var(--dsw-alias-border-l2);
   border-radius: 6px;
   overflow: hidden;
 }
