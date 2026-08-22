@@ -41,7 +41,25 @@ service cloud.firestore {
         && request.resource.data.ownerUid == request.auth.uid;
     }
 
-    // Phase 5+ collections (snapshots, assignments, submissions) get their
-    // rules added in their own phases; deny by default until then.
+    // SQLite snapshots (Phase 5): metadata document + chunks subcollection.
+    // Snapshots are immutable: create once, delete whole — never update.
+    // Chunk access inherits ownership from the parent metadata document.
+    match /sqliteSnapshots/{snapshotId} {
+      allow read, delete: if signedIn()
+        && resource.data.ownerUid == request.auth.uid;
+      allow create: if signedIn()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.snapshotId == snapshotId;
+      allow update: if false;
+
+      match /chunks/{chunkIndex} {
+        allow read, write: if signedIn()
+          && get(/databases/$(database)/documents/sqliteSnapshots/$(snapshotId))
+               .data.ownerUid == request.auth.uid;
+      }
+    }
+
+    // Phase 6+ collections (assignments, submissions) get their rules added
+    // in their own phases; deny by default until then.
   }
 }

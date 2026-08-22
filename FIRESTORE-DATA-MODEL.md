@@ -47,22 +47,24 @@ is typically tens of KB).
 
 ```json
 {
+  "snapshotId": "...",
   "ownerUid": "...",
   "projectId": "...",
   "fileName": "coffee-shop.sqlite",
-  "contentType": "application/x-sqlite3",
   "compression": "gzip",
   "originalSize": 24576,
   "compressedSize": 8120,
   "chunkCount": 1,
-  "checksum": "sha256:<hex>",
+  "checksum": "<64-char sha256 hex of the ORIGINAL uncompressed bytes>",
   "createdAt": "...",
   "kind": "manual"
 }
 ```
 
-Chunks: `sqliteSnapshots/{snapshotId}/chunks/{chunkIndex}` with `data: bytes`
-(~400–500 KiB per chunk, never approaching the 1 MiB document limit — spec §21).
+Chunks: `sqliteSnapshots/{snapshotId}/chunks/{chunkIndex}` with `{ index, data: bytes }`
+(450 KiB per chunk, never approaching the 1 MiB document limit — spec §21). The checksum
+covers the original bytes; restore decompresses, recomputes SHA-256 and refuses to import
+on mismatch. Retention: latest manual snapshot per project; submission snapshots kept.
 
 ## assignments/{assignmentId}
 

@@ -1,7 +1,7 @@
 # Roadmap
 
 Phase plans from spec §43. Detailed per-phase planning documents live at the repo root
-(`phase-*.md`). Status as of Phase 4 completion.
+(`phase-*.md`). Status as of Phase 5 completion.
 
 | Phase | Scope                                          | Status  | Planning doc                            |
 | ----- | ---------------------------------------------- | ------- | --------------------------------------- |
@@ -10,12 +10,12 @@ Phase plans from spec §43. Detailed per-phase planning documents live at the re
 | 2     | SQLite generation (DDL + WASM runtime)         | ✅ done | `phase-2-sqlite-generation.md`          |
 | 3     | SQL Playground                                 | ✅ done | `phase-3-sql-playground.md`             |
 | 4     | Firebase Auth + project sync                   | ✅ done | `phase-4-firebase-auth-projects.md`     |
-| 5     | SQLite snapshots via Firestore chunking        | ⏳ next | `phase-5-firestore-sqlite-snapshots.md` |
-| 6     | Courses & assignments                          | planned | `phase-6-assignments.md`                |
+| 5     | SQLite snapshots via Firestore chunking        | ✅ done | `phase-5-firestore-sqlite-snapshots.md` |
+| 6     | Courses & assignments                          | ⏳ next | `phase-6-assignments.md`                |
 | 7     | Submission + lecturer review                   | planned | `phase-7-submission-lecturer-review.md` |
 | 8     | Hardening (rules tests, a11y, PWA tests, docs) | planned | spec §43                                |
 
-## What exists today (Phase 0–4)
+## What exists today (Phase 0–5)
 
 - React 18 + TypeScript strict + Vite 5 PWA (installable, offline app shell, update prompt)
 - Ant Design app shell with student navigation (Dashboard, My Projects)
@@ -41,6 +41,10 @@ Phase plans from spec §43. Detailed per-phase planning documents live at the re
   retry, last-write-wins pull merge that never overwrites newer local work, profile
   documents with server-side role grants, `firestore.rules` + emulator rules tests,
   Firebase Hosting config; local mode stays 100% functional without any Firebase setup
+- Cloud SQLite snapshots (Phase 5): explicit Save Database → SHA-256 checksum → gzip →
+  450 KiB Firestore chunks; restore verifies the checksum before import and never
+  partially imports a corrupted snapshot; 3 MB warn / 5 MB block limits; retention keeps
+  only the latest manual snapshot per project (submission snapshots preserved for Phase 7)
 
 ## Explicit non-goals (spec §38)
 

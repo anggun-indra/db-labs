@@ -144,4 +144,67 @@ describe.skipIf(!canRun)('Firestore security rules (emulator)', () => {
     const bob = testEnv().authenticatedContext('uid-b')
     await assertFails(getDoc(doc(bob.firestore(), 'users/uid-a')))
   })
+
+  const snapshotMeta = (ownerUid: string, snapshotId: string) => ({
+    snapshotId,
+    ownerUid,
+    projectId: 'p1',
+    fileName: 'db.sqlite',
+    compression: 'gzip',
+    originalSize: 100,
+    compressedSize: 50,
+    chunkCount: 1,
+    checksum: 'a'.repeat(64),
+    createdAt: '2024-01-01T00:00:00.000Z',
+    kind: 'manual'
+  })
+
+  it('lets the owner write snapshot metadata and chunks, then delete them', async () => {
+    const alice = testEnv().authenticatedContext('uid-a')
+    await assertSucceeds(
+      setDoc(doc(alice.firestore(), 'sqliteSnapshots/snap-a'), snapshotMeta('uid-a', 'snap-a'))
+    )
+    await assertSucceeds(
+      setDoc(doc(alice.firestore(), 'sqliteSnapshots/snap-a/chunks/0'), {
+        index: 0,
+        data: new Uint8Array([1, 2, 3])
+      })
+    )
+    await assertSucceeds(getDoc(doc(alice.firestore(), 'sqliteSnapshots/snap-a/chunks/0')))
+    await assertSucceeds(deleteDoc(doc(alice.firestore(), 'sqliteSnapshots/snap-a/chunks/0')))
+    await assertSucceeds(deleteDoc(doc(alice.firestore(), 'sqliteSnapshots/snap-a')))
+  })
+
+  it('denies reading or writing another user\'s snapshot and chunks', async () => {
+    const alice = testEnv().authenticatedContext('uid-a')
+    await assertSucceeds(
+      setDoc(doc(alice.firestore(), 'sqliteSnapshots/snap-b'), snapshotMeta('uid-a', 'snap-b'))
+    )
+
+    const bob = testEnv().authenticatedContext('uid-b')
+    await assertFails(getDoc(doc(bob.firestore(), 'sqliteSnapshots/snap-b')))
+    await assertFails(getDoc(doc(bob.firestore(), 'sqliteSnapshots/snap-b/chunks/0')))
+    await assertFails(
+      setDoc(doc(bob.firestore(), 'sqliteSnapshots/snap-b/chunks/0'), {
+        index: 0,
+        data: new Uint8Array([9])
+      })
+    )
+    await assertFails(deleteDoc(doc(bob.firestore(), 'sqliteSnapshots/snap-b')))
+  })
+
+  it('denies creating a snapshot owned by someone else', async () => {
+    const alice = testEnv().authenticatedContext('uid-a')
+    await assertFails(
+      setDoc(doc(alice.firestore(), 'sqliteSnapshots/snap-c'), snapshotMeta('uid-b', 'snap-c'))
+    )
+  })
+
+  it('denies anonymous snapshot access', async () => {
+    const anon = testEnv().unauthenticatedContext()
+    await assertFails(getDoc(doc(anon.firestore(), 'sqliteSnapshots/snap-a')))
+    await assertFails(
+      setDoc(doc(anon.firestore(), 'sqliteSnapshots/snap-a'), snapshotMeta('uid-a', 'snap-a'))
+    )
+  })
 })

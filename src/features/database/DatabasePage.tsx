@@ -29,6 +29,9 @@ import { generateSqliteSchema } from '@/lib/sqlite/ddlGenerator'
 import { sqliteService } from '@/lib/sqlite/sqlJsRuntime'
 import type { ErdProject } from '@/features/erd/domain/schema'
 import { useProjectDbStore } from '@/stores/projectDbStore'
+import { useAuthStore } from '@/stores/authStore'
+import { isFirebaseConfigured } from '@/lib/firebase/config'
+import { SnapshotPanel } from '@/features/snapshots/SnapshotPanel'
 import { DdlPreviewModal } from './components/DdlPreviewModal'
 import { SchemaExplorer } from './components/SchemaExplorer'
 import { downloadBytes } from '@/lib/download'
@@ -41,6 +44,7 @@ import './database.css'
  */
 export function DatabasePage() {
   const { projectId } = useParams<{ projectId: string }>()
+  const user = useAuthStore((s) => s.user)
   const [erd, setErd] = useState<ErdProject | null>(null)
   const [erdLoading, setErdLoading] = useState(true)
   const [selectedTable, setSelectedTable] = useState<string | null>(null)
@@ -340,6 +344,8 @@ export function DatabasePage() {
           </div>
         )}
       </Card>
+
+      {isFirebaseConfigured() && user && <SnapshotPanel projectId={projectId} erd={erd} />}
 
       <DdlPreviewModal
         open={previewOpen}
