@@ -35,9 +35,12 @@ VITE_FIREBASE_APP_ID=...
 never place a service-account JSON in this repo (spec §38).** Without the variables
 the app automatically runs in local-only mode.
 
-For local testing against the Firebase emulators, additionally set
-`VITE_FIREBASE_AUTH_EMULATOR_URL` and `VITE_FIRESTORE_EMULATOR_HOST` (see `.env.local`
-workflow in TESTING.md); leave them unset for production builds.
+For local testing against the Firebase emulators, use a separate mode so the
+production build stays clean: put the demo config plus
+`VITE_FIREBASE_AUTH_EMULATOR_URL` and `VITE_FIRESTORE_EMULATOR_HOST` in a
+git-ignored `.env.emulator.local` (see TESTING.md), then run
+`npm run dev:emulators`. Vite loads `.env.emulator.local` only in `emulator`
+mode, so `npm run build` and the test suite never see those values.
 
 ## 3. Deploy security rules first
 

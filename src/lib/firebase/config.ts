@@ -37,9 +37,10 @@ export const firebaseConfig: FirebaseWebConfig = {
 
 /**
  * Local emulator hookup (Phase 8 developer workflow). When these are set —
- * normally via a git-ignored `.env.local` — the app talks to the Firebase
- * emulators instead of the cloud. They stay empty in production builds, so
- * deployed apps always use real Firebase.
+ * normally via a git-ignored `.env.emulator.local` plus `npm run dev:emulators`
+ * (mode "emulator", so ordinary dev/build/test stays in local mode) — the app
+ * talks to the Firebase emulators instead of the cloud. They stay empty in
+ * production builds, so deployed apps always use real Firebase.
  */
 const authEmulatorUrl: string = env.VITE_FIREBASE_AUTH_EMULATOR_URL ?? ''
 const firestoreEmulatorHost: string = env.VITE_FIRESTORE_EMULATOR_HOST ?? ''

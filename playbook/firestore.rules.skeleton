@@ -1,0 +1,60 @@
+rules_version = '2';
+
+// Deny-by-default skeleton proven in Database Learning Lab.
+// Conventions:
+//  - every document carries the id of its own path as a field; create rules
+//    enforce field == path id (stops spoofing collection contents)
+//  - ownership = a *Uid field compared to request.auth.uid
+//  - roles live in users/{uid}.role; only create forces 'student'; updates
+//    freeze role (an admin console or server promotes users)
+//  - updates use diff().affectedKeys().hasOnly([...]) whitelists
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+    function isLecturer() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'lecturer';
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.role == 'student';
+      allow update: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.role == resource.data.role;
+      allow delete: if false;
+    }
+
+    match /projects/{projectId} {
+      allow read, update, delete: if signedIn()
+        && resource.data.ownerUid == request.auth.uid;
+      allow create: if signedIn()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.projectId == projectId;
+    }
+
+    match /assignments/{assignmentId} {
+      allow read: if isLecturer() || resource.data.status == 'published';
+      allow create, update, delete: if isLecturer()
+        && resource.data.createdByUid == request.auth.uid;
+    }
+
+    match /submissions/{submissionId} {
+      allow read: if signedIn()
+        && (resource.data.studentUid == request.auth.uid || isLecturer());
+      allow create: if signedIn()
+        && request.resource.data.studentUid == request.auth.uid
+        && request.resource.data.submissionId == submissionId;
+      allow update: if isLecturer()
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['score', 'feedback', 'status', 'gradedAt', 'gradedByUid']);
+      allow delete: if false;
+    }
+  }
+}

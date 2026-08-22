@@ -16,7 +16,11 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:rules": "FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 vitest run firestoreRules",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "emulators": "bash scripts/emulators.sh",
+    "seed:demo": "node scripts/seed-demo.mjs",
+    "gates": "bash scripts/gates.sh",
+    "dev:emulators": "vite --mode emulator"
   },
   "dependencies": {
     "@ant-design/icons": "^5.5.1",
