@@ -14,16 +14,17 @@ const { Header, Sider, Content } = Layout
 
 /**
  * Application shell with the student navigation suggested by spec §32.
- * Database Lab / Profile entries are placeholders until later phases.
+ * The Database Lab entry leads to project selection: the SQL Playground is
+ * always bound to one project. Profile arrives with Phase 4 (Firebase Auth).
  */
 export function AppLayout() {
   const location = useLocation()
   const [collapsed, setCollapsed] = useState(false)
 
-  const selectedKey = location.pathname.startsWith('/projects')
-    ? '/projects'
-    : location.pathname.startsWith('/lab')
-      ? '/lab'
+  const selectedKey = location.pathname.endsWith('/sql')
+    ? '/lab'
+    : location.pathname.startsWith('/projects')
+      ? '/projects'
       : '/'
 
   return (
@@ -57,9 +58,8 @@ export function AppLayout() {
             {
               key: '/lab',
               icon: <ConsoleSqlOutlined />,
-              label: 'Database Lab',
-              disabled: true,
-              title: 'Arrives in Phase 3 (SQL Playground)'
+              label: <Link to="/projects">Database Lab</Link>,
+              title: 'Open a project, then use its SQL Playground'
             },
             {
               key: '/profile',

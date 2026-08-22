@@ -30,6 +30,20 @@ export class InvalidDatabaseFileError extends Error {
   }
 }
 
+/**
+ * True when the last statement in a script is one that produces rows even
+ * when it matches nothing (SELECT/PRAGMA/WITH/VALUES/EXPLAIN). Used to
+ * classify sql.js empty results, which carry no statement-type information.
+ */
+export function lastStatementIsQuery(sql: string): boolean {
+  const statements = sql
+    .split(';')
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0)
+  const last = statements[statements.length - 1] ?? ''
+  return /^(SELECT|PRAGMA|WITH|VALUES|EXPLAIN)\b/i.test(last)
+}
+
 export interface SqliteDatabaseService {
   create(projectId: string, ddl: string): Promise<void>
   /** Returns false when no stored database exists for the project. */
@@ -156,6 +170,11 @@ export class SqlJsDatabaseService implements SqliteDatabaseService {
       }
 
       this.schedulePersist()
+      // sql.js `exec` returns [] for zero-row queries; classify by the last
+      // statement's shape so an empty SELECT is still a result set.
+      if (lastStatementIsQuery(sql)) {
+        return { kind: 'rows', columns: [], rows: [], affectedRows: 0, executionTimeMs }
+      }
       return { kind: 'mutation', affectedRows, executionTimeMs }
     } catch (error) {
       const raw = error instanceof Error ? error.message : String(error)

@@ -1,21 +1,22 @@
 # Roadmap
 
 Phase plans from spec §43. Detailed per-phase planning documents live at the repo root
-(`phase-*.md`). Status as of Phase 2 completion.
+(`phase-*.md`). Status as of Phase 3 completion.
 
 | Phase | Scope                                          | Status  | Planning doc                            |
 | ----- | ---------------------------------------------- | ------- | --------------------------------------- |
 | 0     | Project foundation                             | ✅ done | spec §43                                |
 | 1     | Local ERD designer                             | ✅ done | spec §43                                |
 | 2     | SQLite generation (DDL + WASM runtime)         | ✅ done | `phase-2-sqlite-generation.md`          |
-| 3     | SQL Playground                                 | ⏳ next | `phase-3-sql-playground.md`             |
+| 3     | SQL Playground                                 | ✅ done | `phase-3-sql-playground.md`             |
+| 4     | Firebase Auth + project sync                   | ⏳ next | `phase-4-firebase-auth-projects.md`     |
 | 4     | Firebase Auth + project sync                   | planned | `phase-4-firebase-auth-projects.md`     |
 | 5     | SQLite snapshots via Firestore chunking        | planned | `phase-5-firestore-sqlite-snapshots.md` |
 | 6     | Courses & assignments                          | planned | `phase-6-assignments.md`                |
 | 7     | Submission + lecturer review                   | planned | `phase-7-submission-lecturer-review.md` |
 | 8     | Hardening (rules tests, a11y, PWA tests, docs) | planned | spec §43                                |
 
-## What exists today (Phase 0+1+2)
+## What exists today (Phase 0+1+2+3)
 
 - React 18 + TypeScript strict + Vite 5 PWA (installable, offline app shell, update prompt)
 - Ant Design app shell with student navigation (Dashboard, My Projects)
@@ -32,7 +33,10 @@ Phase plans from spec §43. Detailed per-phase planning documents live at the re
 - In-browser SQLite via sql.js with OPFS/IndexedDB byte persistence (ADR-0006); foreign keys on
 - Database page: schema explorer (columns, PK/FK, indexes, CREATE TABLE, row browsing),
   drift detection vs the ERD, import/export `.sqlite`, rebuild and reset flows
-- Rule-based SQLite error hints for teaching (no LLM)
+- SQL Playground: Monaco editor (bundled locally, offline-capable), run selection/whole
+  script, Ctrl/Cmd+Enter, per-project draft, result table with 500-row render cap, copy/CSV
+  export, timing and affected rows, per-project history with re-run, visual row editor
+  (add/edit/delete with generated SQL shown), rule-based SQLite error hints
 - Firebase config scaffold (local mode until configured); no Firebase runtime dependency yet
 
 ## Explicit non-goals (spec §38)

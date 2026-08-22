@@ -145,3 +145,36 @@ describe('SqlJsDatabaseService', () => {
     await service.close()
   })
 })
+
+describe('empty result classification', () => {
+  it('treats a zero-row SELECT as rows, not mutation', async () => {
+    const service = makeService()
+    await service.create('p1', SIMPLE_DDL)
+    const result = await service.execute('SELECT * FROM customers;')
+    expect(result.kind).toBe('rows')
+    expect(result.rows).toEqual([])
+    await service.close()
+  })
+
+  it('keeps INSERT without rows as mutation', async () => {
+    const service = makeService()
+    await service.create('p1', SIMPLE_DDL)
+    const result = await service.execute(
+      "INSERT INTO customers (id, name) VALUES (1, 'Andi');"
+    )
+    expect(result.kind).toBe('mutation')
+    expect(result.affectedRows).toBe(1)
+    await service.close()
+  })
+
+  it('classifies by the last statement of a script', async () => {
+    const service = makeService()
+    await service.create('p1', SIMPLE_DDL)
+    const mixed = await service.execute(
+      "INSERT INTO customers (id, name) VALUES (1, 'Andi'); SELECT * FROM customers WHERE id = 999;"
+    )
+    expect(mixed.kind).toBe('rows')
+    expect(mixed.rows).toEqual([])
+    await service.close()
+  })
+})

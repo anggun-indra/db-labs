@@ -15,6 +15,8 @@ test.describe('SQLite generation', () => {
     await dialog.getByRole('button', { name: /Create/i }).click()
     await expect(page.getByLabel('Project name')).toHaveValue('E2E SQLite')
     await page.getByRole('button', { name: 'Add table' }).click()
+    // Close the table inspector drawer so it does not cover the toolbar.
+    await page.keyboard.press('Escape')
 
     // Open the database page and generate the schema.
     await page.getByRole('button', { name: 'Database' }).click()
@@ -45,6 +47,7 @@ test.describe('SQLite generation', () => {
     await dialog.locator('input').fill('E2E Rebuild')
     await dialog.getByRole('button', { name: /Create/i }).click()
     await page.getByRole('button', { name: 'Add table' }).click()
+    await page.keyboard.press('Escape')
 
     await page.getByRole('button', { name: 'Database' }).click()
     await page.getByRole('button', { name: /Generate from ERD/i }).first().click()

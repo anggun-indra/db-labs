@@ -37,6 +37,12 @@ export default defineConfig({
         // Cache the application shell; do NOT aggressively cache Firestore/API
         // responses (spec §30). Firebase SDK manages its own network behavior.
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,wasm}'],
+        // The TypeScript language worker ships with the full monaco-editor
+        // entry but is never used for SQL; keep it out of the precache.
+        globIgnores: ['**/ts.worker*.js'],
+        // Monaco is a single large vendor chunk; precache it so the SQL
+        // Playground also works offline (Phase 3).
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//]
       },
@@ -55,10 +61,14 @@ export default defineConfig({
       output: {
         // Split heavy vendors so app-shell updates do not invalidate them
         // (also keeps each precached PWA chunk smaller, spec §30).
-        manualChunks: {
-          antd: ['antd', '@ant-design/icons'],
-          xyflow: ['@xyflow/react'],
-          firebase: ['firebase/app']
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined
+          if (id.includes('monaco-editor')) return 'vendor-monaco'
+          if (id.includes('sql.js')) return 'vendor-sqljs'
+          if (id.includes('antd') || id.includes('@ant-design')) return 'antd'
+          if (id.includes('@xyflow')) return 'xyflow'
+          if (id.includes('firebase')) return 'firebase'
+          return undefined
         }
       }
     }

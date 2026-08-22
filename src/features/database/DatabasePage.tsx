@@ -15,6 +15,7 @@ import {
 import {
   ApartmentOutlined,
   ArrowLeftOutlined,
+  ConsoleSqlOutlined,
   DownloadOutlined,
   ExclamationCircleFilled,
   FileAddOutlined,
@@ -211,6 +212,11 @@ export function DatabasePage() {
         <Space wrap>
           <Link to={`/projects/${projectId}/erd`}>
             <Button icon={<ApartmentOutlined />}>Edit ERD</Button>
+          </Link>
+          <Link to={`/projects/${projectId}/sql`}>
+            <Button icon={<ConsoleSqlOutlined />} disabled={status !== 'open'}>
+              SQL Playground
+            </Button>
           </Link>
           {status === 'open' ? (
             <Button
