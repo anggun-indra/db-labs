@@ -104,7 +104,7 @@ export function ErdEditorPage() {
   return (
     <ReactFlowProvider>
       <div className="erd-editor">
-        <ErdToolbar />
+        <ErdToolbar projectId={projectId} />
         <div className="erd-editor__canvas">
           <ErdCanvas />
           <ValidationPanel />

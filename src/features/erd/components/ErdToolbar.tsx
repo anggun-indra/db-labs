@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Button, Input, Space, Tag, Tooltip } from 'antd'
 import {
   ArrowLeftOutlined,
+  DatabaseOutlined,
   ExpandOutlined,
   PlusOutlined,
   RedoOutlined,
@@ -25,7 +26,7 @@ const saveStatusConfig: Record<SaveStatus, { color: string; label: string }> = {
  * Editor toolbar: project name, save status, add table, undo/redo, view
  * controls. Save status display is required by spec §19.
  */
-export function ErdToolbar() {
+export function ErdToolbar({ projectId }: { projectId?: string }) {
   const projectName = useErdEditorStore((s) => s.project?.name ?? '')
   const saveStatus = useErdEditorStore((s) => s.saveStatus)
   const canUndo = useErdEditorStore((s) => s.past.length > 0)
@@ -70,6 +71,11 @@ export function ErdToolbar() {
         <Button type="primary" icon={<PlusOutlined />} onClick={handleAddTable}>
           Add table
         </Button>
+        {projectId && (
+          <Link to={`/projects/${projectId}/database`}>
+            <Button icon={<DatabaseOutlined />}>Database</Button>
+          </Link>
+        )}
         <Button.Group>
           <Tooltip title="Undo (Ctrl+Z)">
             <Button icon={<UndoOutlined />} onClick={undo} disabled={!canUndo} aria-label="Undo" />

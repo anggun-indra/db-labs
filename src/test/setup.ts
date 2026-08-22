@@ -5,7 +5,10 @@ import { installMemoryLocalStorage } from './memoryStorage'
 
 // Node 25's inert experimental localStorage shadows jsdom's; replace it with a
 // deterministic in-memory implementation BEFORE app modules are imported.
-installMemoryLocalStorage()
+// Node-environment test files (e.g. the SQLite runtime) have no window.
+if (typeof window !== 'undefined') {
+  installMemoryLocalStorage()
+}
 
 // ---- jsdom environment shims required by antd / React Flow ----------------
 
@@ -38,6 +41,7 @@ if (typeof window !== 'undefined' && !window.ResizeObserver) {
 
 // React Testing Library auto-cleanup between tests.
 afterEach(() => {
+  if (typeof window === 'undefined') return
   cleanup()
   window.localStorage.clear()
 })

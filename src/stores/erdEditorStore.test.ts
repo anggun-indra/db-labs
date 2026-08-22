@@ -247,4 +247,18 @@ describe('erdEditorStore', () => {
     expect(loaded?.name).toBe('Flushed')
     expect(useErdEditorStore.getState().saveStatus).toBe('saved')
   })
+
+  it('closeProject saves pending edits instead of dropping them', async () => {
+    useErdEditorStore.getState().loadProject(makeProject())
+    const projectId = useErdEditorStore.getState().project!.projectId
+    useErdEditorStore.getState().addTable({ x: 0, y: 0 })
+    expect(useErdEditorStore.getState().saveStatus).toBe('dirty')
+
+    // Navigate away before the debounce fires.
+    useErdEditorStore.getState().closeProject()
+    await vi.advanceTimersByTimeAsync(0)
+
+    const loaded = await projectRepository.loadProject(projectId)
+    expect(loaded?.tables).toHaveLength(3)
+  })
 })

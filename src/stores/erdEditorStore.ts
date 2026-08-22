@@ -187,9 +187,16 @@ export const useErdEditorStore = create<ErdEditorState & InternalFields>()((set,
     },
 
     closeProject() {
+      const { project, saveStatus } = get()
       if (autosaveTimer) {
         clearTimeout(autosaveTimer)
         autosaveTimer = undefined
+        // Leaving the page must not drop unsaved edits (spec §19 autosave).
+        if (project && saveStatus === 'dirty') {
+          void projectRepository.saveProject(project).catch((error) => {
+            console.error('Autosave on close failed:', error)
+          })
+        }
       }
       set({
         project: null,

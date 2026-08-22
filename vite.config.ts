@@ -36,7 +36,7 @@ export default defineConfig({
       workbox: {
         // Cache the application shell; do NOT aggressively cache Firestore/API
         // responses (spec §30). Firebase SDK manages its own network behavior.
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,woff2,wasm}'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//]
       },
