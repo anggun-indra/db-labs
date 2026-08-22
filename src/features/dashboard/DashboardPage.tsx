@@ -18,7 +18,7 @@ export function DashboardPage() {
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
         <div>
           <Typography.Title level={2} style={{ marginBottom: 4 }}>
-            Database Learning Lab
+            DBLab
           </Typography.Title>
           <Typography.Text type="secondary">
             Manajemen Database — learn by doing: design an ERD, generate a real SQLite database and

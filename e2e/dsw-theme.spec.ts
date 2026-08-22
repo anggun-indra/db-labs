@@ -119,4 +119,37 @@ test.describe('dsw design system regression', () => {
     // Toolbar actions must not sit under the mask-less drawer.
     await expect(page.getByRole('button', { name: 'Database' })).toBeVisible()
   })
+
+  test('sidebar: DBLab brand, 280px rail, collapse toggle, Settings at the bottom', async ({
+    page
+  }) => {
+    await page.goto('/')
+    // Brand renamed to DBLab.
+    await expect(page.locator('.app-logo__text')).toHaveText('DBLab')
+    // Harness-width rail (280px).
+    const siderWidth = await page.evaluate(() =>
+      Math.round(document.querySelector('.app-sider')!.getBoundingClientRect().width)
+    )
+    expect(siderWidth).toBe(280)
+    // Settings lives in the foot area, not in the menu.
+    await expect(page.locator('.app-sider__settings')).toBeVisible()
+    expect(await page.locator('.ant-menu-item').filter({ hasText: 'Settings' }).count()).toBe(0)
+    // Collapse to the 56px rail and expand again via the brand button.
+    await page.getByRole('button', { name: 'Collapse sidebar' }).click()
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          Math.round(document.querySelector('.app-sider')!.getBoundingClientRect().width)
+        )
+      )
+      .toBe(56)
+    await page.getByRole('button', { name: 'Expand sidebar' }).click()
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          Math.round(document.querySelector('.app-sider')!.getBoundingClientRect().width)
+        )
+      )
+      .toBe(280)
+  })
 })

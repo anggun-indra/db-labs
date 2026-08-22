@@ -15,12 +15,12 @@ export function registerServiceWorker(): void {
         onNeedRefresh() {
           // Keep dependency-free for Phase 0; a friendlier AntD modal can
           // replace confirm() once the notification center exists.
-          if (window.confirm('A new version of Database Learning Lab is available. Reload?')) {
+          if (window.confirm('A new version of DBLab is available. Reload?')) {
             window.location.reload()
           }
         },
         onOfflineReady() {
-          console.info('[pwa] Database Learning Lab is ready to work offline.')
+          console.info('[pwa] DBLab is ready to work offline.')
         }
       })
     })

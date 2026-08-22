@@ -101,3 +101,25 @@ the extent the domain allows:
 Remaining differences are inherent to the domain: dsh's chat/agent/model
 components have no counterpart in a database course app, so their visuals
 were translated onto this app's equivalent components instead of copied.
+
+## Follow-up: rename + harness sidebar shell
+
+New objective: name the app **DBLab**, widen the sidebar to the harness
+width, use a harness-style collapse/expand affordance, and pin Settings to
+the bottom of the rail.
+
+- [x] Renamed the product surface to **DBLab**: sidebar brand, dashboard hero,
+      document `<title>`, PWA manifest `name`, sign-in card, error boundary
+      and update prompt. (The course strap in the header stays descriptive.)
+- [x] Sidebar widened to the harness rail width **280px** (expanded) /
+      **56px** (collapsed), matching the dsh `sidebar:280` constant and the
+      icon-only collapsed rail.
+- [x] Harness-style collapse/expand: a round 28px icon button (dsh
+      `iconButton`) sits at the right of the 60px logo row; when collapsed the
+      brand mark itself becomes the expand button (dsh collapsed logoRow).
+- [x] Settings moved out of the menu into the bottom **foot area** (dsh
+      `footArea` + settings trigger): a 42px radius-12 cell with icon+label,
+      collapsing to a 36px circular rail cell.
+- [x] e2e locks the new shell: brand=DBLab, rail 280↔56px collapse/expand,
+      Settings present in foot area and absent from the menu. All gates green;
+      12 reference screenshots refreshed.

@@ -8,6 +8,7 @@ import {
   ConsoleSqlOutlined,
   DatabaseOutlined,
   FormOutlined,
+  MenuFoldOutlined,
   SettingOutlined,
   UserOutlined,
   WifiOutlined
@@ -18,10 +19,12 @@ import { useAuthStore } from '@/stores/authStore'
 const { Header, Sider, Content } = Layout
 
 /**
- * Application shell with the student navigation suggested by spec §32.
- * The Database Lab entry leads to project selection: the SQL Playground is
- * always bound to one project. Profile (Phase 4) hosts sign-in and account
- * details; in local mode it explains that everything stays on-device.
+ * Application shell — DeepSeek-harness-style sidebar: 280px wide rail with a
+ * brand row + collapse icon button, primary navigation in the middle, and
+ * Settings pinned to the bottom (the dsh footArea pattern). The Database Lab
+ * entry leads to project selection: the SQL Playground is always bound to
+ * one project. Profile (Phase 4) hosts sign-in and account details; in local
+ * mode it explains that everything stays on-device.
  */
 export function AppLayout() {
   const location = useLocation()
@@ -56,15 +59,41 @@ export function AppLayout() {
         breakpoint="lg"
         theme="light"
         className="app-sider"
+        width={280}
+        collapsedWidth={56}
+        trigger={null}
       >
-        <div className="app-logo">
-          <DatabaseOutlined className="app-logo__icon" />
-          {!collapsed && <span className="app-logo__text">Database Learning Lab</span>}
+        <div className={collapsed ? 'app-logo app-logo--collapsed' : 'app-logo'}>
+          {collapsed ? (
+            <button
+              type="button"
+              className="app-sider__toggle"
+              aria-label="Expand sidebar"
+              onClick={() => setCollapsed(false)}
+            >
+              <DatabaseOutlined style={{ color: 'var(--dsw-alias-brand-primary)' }} />
+            </button>
+          ) : (
+            <>
+              <Link to="/" className="app-logo__brand">
+                <DatabaseOutlined className="app-logo__icon" />
+                <span className="app-logo__text">DBLab</span>
+              </Link>
+              <button
+                type="button"
+                className="app-sider__toggle"
+                aria-label="Collapse sidebar"
+                onClick={() => setCollapsed(true)}
+              >
+                <MenuFoldOutlined />
+              </button>
+            </>
+          )}
         </div>
         <Menu
           theme="light"
           mode="inline"
-          selectedKeys={[selectedKey]}
+          selectedKeys={[selectedKey === '/settings' ? '' : selectedKey]}
           items={[
             {
               key: '/',
@@ -92,12 +121,6 @@ export function AppLayout() {
                   : undefined
             },
             {
-              key: '/settings',
-              icon: <SettingOutlined />,
-              label: <Link to="/settings">Settings</Link>,
-              title: 'Appearance and connection settings'
-            },
-            {
               key: '/profile',
               icon: <UserOutlined />,
               label: <Link to="/profile">Profile</Link>,
@@ -108,6 +131,20 @@ export function AppLayout() {
             }
           ]}
         />
+        <div className="app-sider__foot">
+          <Link
+            to="/settings"
+            className={
+              selectedKey === '/settings'
+                ? 'app-sider__settings app-sider__settings--active'
+                : 'app-sider__settings'
+            }
+            title="Settings"
+          >
+            <SettingOutlined className="app-sider__settings-icon" />
+            {!collapsed && <span>Settings</span>}
+          </Link>
+        </div>
       </Sider>
       <Layout>
         <Header className="app-header">

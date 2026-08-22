@@ -12,7 +12,7 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'Database Learning Lab',
+        name: 'DBLab',
         short_name: 'DB Lab',
         description:
           'Learn database management hands-on: design ERDs, generate SQLite databases and practice SQL right in your browser.',

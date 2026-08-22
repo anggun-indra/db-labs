@@ -127,7 +127,7 @@ export function ProfilePage() {
 
   return (
     <div className="profile-page">
-      <Card title="Sign in to Database Learning Lab" className="profile-card">
+      <Card title="Sign in to DBLab" className="profile-card">
         {authError && (
           <Alert type="error" showIcon message={authError} style={{ marginBottom: 16 }} />
         )}

@@ -71,7 +71,7 @@ export function UnsupportedBrowserNotice() {
       <Result
         status="warning"
         title="Browser not supported"
-        subTitle="Database Learning Lab runs SQLite inside your browser via WebAssembly. Please use a current version of Chrome, Edge, Firefox or Safari — your data never leaves the device."
+        subTitle="DBLab runs SQLite inside your browser via WebAssembly. Please use a current version of Chrome, Edge, Firefox or Safari — your data never leaves the device."
       />
     </div>
   )

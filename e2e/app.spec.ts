@@ -9,7 +9,7 @@ import { expect, test } from '@playwright/test'
 test.describe('app boot and project lifecycle', () => {
   test('shows the dashboard', async ({ page }) => {
     await page.goto('/')
-    await expect(page.getByText('Database Learning Lab').first()).toBeVisible()
+    await expect(page.getByText('DBLab').first()).toBeVisible()
     await expect(page.getByRole('link', { name: /Open my projects/i })).toBeVisible()
   })
 

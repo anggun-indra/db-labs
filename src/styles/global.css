@@ -9,27 +9,63 @@ body {
   font-family: var(--dsw-font-family);
 }
 
-/* Sidebar — dsh uses a dedicated sidebar fill token
- * (light: neutral-bluish-50, dark: neutral-bluish-900). */
+/* Sidebar — DeepSeek harness rail: 280px wide (set on the Sider), dedicated
+ * sidebar fill token, 60px logo row with a round collapse icon button, and
+ * Settings pinned to the bottom foot area. */
 .app-sider {
   background: var(--dsw-specific-sidebar-fill) !important;
-  border-right: 1px solid var(--dsw-alias-border-l2);
+  border-right: 1px solid var(--dsw-alias-border-l1);
 }
 
-.app-sider .ant-layout-sider-trigger {
-  background: transparent;
-  color: var(--dsw-alias-label-secondary);
-  border-top: 1px solid var(--dsw-alias-border-l1);
-}
-
-.app-logo {
+.app-sider .ant-layout-sider-children {
   display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.app-sider .ant-menu {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Logo row (dsh logoRow: 60px, brand left, icon button right). */
+.app-logo {
+  box-sizing: border-box;
+  display: flex;
+  flex: none;
   align-items: center;
   gap: 8px;
   height: 60px;
-  padding: 8px 14px;
+  margin-bottom: 8px;
+  padding: 8px 8px 8px 14px;
   overflow: hidden;
   white-space: nowrap;
+}
+
+.app-logo--collapsed {
+  justify-content: center;
+  height: 48px;
+  margin: 12px 0 8px;
+  padding: 0;
+}
+
+.app-logo__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  color: inherit;
+  overflow: hidden;
+}
+
+.app-logo__brand:hover .app-logo__text {
+  color: var(--dsw-static-deepseek-450);
+}
+
+.app-logo--collapsed .app-logo__brand {
+  flex: none;
 }
 
 .app-logo__icon {
@@ -43,6 +79,81 @@ body {
   font-size: 18px;
   line-height: 24px;
   letter-spacing: 0.04em;
+}
+
+/* Collapse/expand icon button (dsh iconButton: round, 28px; 36px collapsed). */
+.app-sider__toggle {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background var(--ds-transition-duration-fast, 0.1s) var(--ds-ease-in-out);
+}
+
+.app-sider__toggle:hover {
+  background: var(--dsw-alias-interactive-bg-hover, rgba(15, 17, 21, 0.05));
+}
+
+.app-logo--collapsed .app-sider__toggle {
+  width: 36px;
+  height: 36px;
+}
+
+/* Foot area — Settings pinned to the bottom (dsh footArea + settings trigger:
+ * 42px cell, radius 12, icon + label; circular 36px rail cell when collapsed). */
+.app-sider__foot {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  border-top: 1px solid var(--dsw-alias-border-l2);
+}
+
+.app-sider__settings {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 12px;
+  color: var(--dsw-alias-label-primary);
+  font-size: 14px;
+  line-height: 22px;
+  overflow: hidden;
+  transition: background var(--ds-transition-duration-fast, 0.1s) var(--ds-ease-in-out);
+}
+
+.app-sider__settings:hover {
+  background: var(--dsw-alias-interactive-bg-hover, rgba(15, 17, 21, 0.05));
+  color: var(--dsw-alias-label-primary);
+}
+
+.app-sider__settings--active {
+  background: var(--dsw-alias-bg-module-platform, var(--dsw-static-neutral-bluish-60));
+}
+
+.app-sider__settings-icon {
+  font-size: 16px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.ant-layout-sider-collapsed .app-sider__settings {
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 0 auto;
+  padding: 0;
+  border-radius: 50%;
 }
 
 .app-header {

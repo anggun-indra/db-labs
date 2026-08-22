@@ -43,7 +43,7 @@ test('app shell re-opens offline once the service worker is ready', async ({ pag
 
   // The cached app shell renders without any network.
   await expect(page.getByRole('menuitem', { name: /My Projects/ })).toBeVisible()
-  await expect(page.getByText(/Database Learning Lab/i).first()).toBeVisible()
+  await expect(page.getByText(/DBLab/i).first()).toBeVisible()
 
   await context.setOffline(false)
 })
