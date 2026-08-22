@@ -7,6 +7,7 @@ import { ProjectsPage } from '@/features/projects/ProjectsPage'
 import { ErdEditorPage } from '@/features/erd/ErdEditorPage'
 import { DatabasePage } from '@/features/database/DatabasePage'
 import { ProfilePage } from '@/features/profile/ProfilePage'
+import { AssignmentsPage } from '@/features/assignments/AssignmentsPage'
 
 /**
  * The SQL Playground is lazy: it pulls Monaco and the playground feature
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardPage /> },
       { path: 'projects', element: <ProjectsPage /> },
+      { path: 'assignments', element: <AssignmentsPage /> },
       { path: 'profile', element: <ProfilePage /> },
       { path: 'projects/:projectId/erd', element: <ErdEditorPage /> },
       { path: 'projects/:projectId/database', element: <DatabasePage /> },

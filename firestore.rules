@@ -15,6 +15,14 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // Roles are granted server-side (users/{uid}.role). This is the single
+    // authoritative lecturer check used by courses/assignments/submissions.
+    function isLecturer() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'lecturer';
+    }
+
     match /users/{uid} {
       // A user may read and update their own profile, but the role field
       // is frozen after creation (server-side role enforcement).
@@ -59,7 +67,28 @@ service cloud.firestore {
       }
     }
 
-    // Phase 6+ collections (assignments, submissions) get their rules added
-    // in their own phases; deny by default until then.
+    // Courses (Phase 6): readable by any signed-in user, managed by lecturers.
+    match /courses/{courseId} {
+      allow read: if signedIn();
+      allow create, update: if isLecturer()
+        && request.resource.data.lecturerUid == request.auth.uid;
+      allow delete: if isLecturer();
+    }
+
+    // Assignments (Phase 6): students read published only; lecturers manage
+    // their own. Drafts/archived never leak to students because the read
+    // rule requires status == 'published' for non-lecturers.
+    match /assignments/{assignmentId} {
+      allow read: if signedIn()
+        && (isLecturer() || resource.data.status == 'published');
+      allow create: if isLecturer()
+        && request.resource.data.createdByUid == request.auth.uid
+        && request.resource.data.assignmentId == assignmentId;
+      allow update, delete: if isLecturer()
+        && resource.data.createdByUid == request.auth.uid;
+    }
+
+    // Phase 7 collections (submissions) get their rules added in that
+    // phase; deny by default until then.
   }
 }

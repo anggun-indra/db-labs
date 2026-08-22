@@ -207,4 +207,92 @@ describe.skipIf(!canRun)('Firestore security rules (emulator)', () => {
       setDoc(doc(anon.firestore(), 'sqliteSnapshots/snap-a'), snapshotMeta('uid-a', 'snap-a'))
     )
   })
+
+  /* Phase 6: courses & assignments */
+
+  async function seedLecturer(uid: string) {
+    await testEnv().withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), `users/${uid}`), {
+        uid,
+        displayName: 'Lecturer',
+        email: `${uid}@lecturer.ac.id`,
+        role: 'lecturer',
+        createdAt: '2024-01-01T00:00:00.000Z'
+      })
+    })
+  }
+
+  const assignmentDoc = (createdByUid: string, status: string) => ({
+    assignmentId: 'asg-1',
+    courseId: 'c1',
+    title: 'Marketplace Database',
+    description: '',
+    instructions: '',
+    learningObjectives: [],
+    requirements: [],
+    dueAt: null,
+    status,
+    starterErd: null,
+    starterSql: '',
+    sampleData: '',
+    createdByUid,
+    createdAt: '2024-01-01T00:00:00.000Z',
+    updatedAt: '2024-01-01T00:00:00.000Z'
+  })
+
+  it('lets lecturers manage courses but not students', async () => {
+    await seedLecturer('lec-1')
+    const lecturer = testEnv().authenticatedContext('lec-1')
+    const course = {
+      courseId: 'c1',
+      title: 'Manajemen Database',
+      description: '',
+      lecturerUid: 'lec-1',
+      createdAt: '2024-01-01T00:00:00.000Z'
+    }
+    await assertSucceeds(setDoc(doc(lecturer.firestore(), 'courses/c1'), course))
+
+    const student = testEnv().authenticatedContext('uid-a')
+    await assertSucceeds(getDoc(doc(student.firestore(), 'courses/c1')))
+    await assertFails(
+      setDoc(doc(student.firestore(), 'courses/c2'), { ...course, courseId: 'c2', lecturerUid: 'uid-a' })
+    )
+  })
+
+  it('students read published assignments but never drafts', async () => {
+    await seedLecturer('lec-1')
+    const lecturer = testEnv().authenticatedContext('lec-1')
+    await assertSucceeds(
+      setDoc(doc(lecturer.firestore(), 'assignments/asg-pub'), assignmentDoc('lec-1', 'published'))
+    )
+    await assertSucceeds(
+      setDoc(doc(lecturer.firestore(), 'assignments/asg-draft'), assignmentDoc('lec-1', 'draft'))
+    )
+
+    const student = testEnv().authenticatedContext('uid-a')
+    await assertSucceeds(getDoc(doc(student.firestore(), 'assignments/asg-pub')))
+    await assertFails(getDoc(doc(student.firestore(), 'assignments/asg-draft')))
+    await assertFails(
+      setDoc(doc(student.firestore(), 'assignments/asg-x'), assignmentDoc('uid-a', 'published'))
+    )
+  })
+
+  it('lecturers manage only their own assignments', async () => {
+    await seedLecturer('lec-1')
+    await seedLecturer('lec-2')
+    const lecturer1 = testEnv().authenticatedContext('lec-1')
+    await assertSucceeds(
+      setDoc(doc(lecturer1.firestore(), 'assignments/asg-own'), assignmentDoc('lec-1', 'draft'))
+    )
+    // Cannot create an assignment owned by another lecturer.
+    await assertFails(
+      setDoc(doc(lecturer1.firestore(), 'assignments/asg-other'), assignmentDoc('lec-2', 'draft'))
+    )
+
+    const lecturer2 = testEnv().authenticatedContext('lec-2')
+    await assertFails(deleteDoc(doc(lecturer2.firestore(), 'assignments/asg-own')))
+    await assertFails(
+      setDoc(doc(lecturer2.firestore(), 'assignments/asg-own'), assignmentDoc('lec-1', 'archived'))
+    )
+  })
 })

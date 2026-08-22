@@ -7,6 +7,7 @@ import {
   CloudOutlined,
   ConsoleSqlOutlined,
   DatabaseOutlined,
+  FormOutlined,
   UserOutlined,
   WifiOutlined
 } from '@ant-design/icons'
@@ -37,9 +38,11 @@ export function AppLayout() {
     ? '/lab'
     : location.pathname.startsWith('/projects')
       ? '/projects'
-      : location.pathname.startsWith('/profile')
-        ? '/profile'
-        : '/'
+      : location.pathname.startsWith('/assignments')
+        ? '/assignments'
+        : location.pathname.startsWith('/profile')
+          ? '/profile'
+          : '/'
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -74,6 +77,15 @@ export function AppLayout() {
               icon: <ConsoleSqlOutlined />,
               label: <Link to="/projects">Database Lab</Link>,
               title: 'Open a project, then use its SQL Playground'
+            },
+            {
+              key: '/assignments',
+              icon: <FormOutlined />,
+              label: <Link to="/assignments">Assignments</Link>,
+              title:
+                mode === 'local'
+                  ? 'Assignments arrive once Firebase is configured'
+                  : undefined
             },
             {
               key: '/profile',

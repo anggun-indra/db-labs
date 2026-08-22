@@ -1,7 +1,7 @@
 # Roadmap
 
 Phase plans from spec §43. Detailed per-phase planning documents live at the repo root
-(`phase-*.md`). Status as of Phase 5 completion.
+(`phase-*.md`). Status as of Phase 6 completion.
 
 | Phase | Scope                                          | Status  | Planning doc                            |
 | ----- | ---------------------------------------------- | ------- | --------------------------------------- |
@@ -11,11 +11,11 @@ Phase plans from spec §43. Detailed per-phase planning documents live at the re
 | 3     | SQL Playground                                 | ✅ done | `phase-3-sql-playground.md`             |
 | 4     | Firebase Auth + project sync                   | ✅ done | `phase-4-firebase-auth-projects.md`     |
 | 5     | SQLite snapshots via Firestore chunking        | ✅ done | `phase-5-firestore-sqlite-snapshots.md` |
-| 6     | Courses & assignments                          | ⏳ next | `phase-6-assignments.md`                |
-| 7     | Submission + lecturer review                   | planned | `phase-7-submission-lecturer-review.md` |
+| 6     | Courses & assignments                          | ✅ done | `phase-6-assignments.md`                |
+| 7     | Submission + lecturer review                   | ⏳ next | `phase-7-submission-lecturer-review.md` |
 | 8     | Hardening (rules tests, a11y, PWA tests, docs) | planned | spec §43                                |
 
-## What exists today (Phase 0–5)
+## What exists today (Phase 0–6)
 
 - React 18 + TypeScript strict + Vite 5 PWA (installable, offline app shell, update prompt)
 - Ant Design app shell with student navigation (Dashboard, My Projects)
@@ -45,6 +45,13 @@ Phase plans from spec §43. Detailed per-phase planning documents live at the re
   450 KiB Firestore chunks; restore verifies the checksum before import and never
   partially imports a corrupted snapshot; 3 MB warn / 5 MB block limits; retention keeps
   only the latest manual snapshot per project (submission snapshots preserved for Phase 7)
+- Courses & assignments (Phase 6): lecturer assignment CRUD with publish/unpublish/archive
+  (drafts are deletable, published assignments are archived — never destructively deleted),
+  due dates, learning objectives and requirements; starter ERD (cloned from a lecturer's
+  local project), starter SQL and sample data. Students see only published assignments,
+  start them by deep-cloning the starter ERD into their own project (template untouched),
+  and can initialize their local DB from the starter SQL. Authorization enforced in
+  Firestore rules (lecturer role server-side)
 
 ## Explicit non-goals (spec §38)
 

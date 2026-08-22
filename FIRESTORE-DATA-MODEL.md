@@ -70,18 +70,27 @@ on mismatch. Retention: latest manual snapshot per project; submission snapshots
 
 ```json
 {
+  "assignmentId": "...",
   "courseId": "database-management",
   "title": "Marketplace Database",
   "description": "...",
   "instructions": "...",
-  "dueDate": "...",
-  "status": "draft | published",
-  "learningObjective": "...",
-  "starterErd": null,
-  "starterSql": null,
-  "sampleData": null
+  "learningObjectives": ["Model 1:N relationships"],
+  "requirements": ["At least 4 tables"],
+  "dueAt": "... (ISO) or null",
+  "status": "draft | published | archived",
+  "starterErd": { "...frozen ErdProject or null" },
+  "starterSql": "CREATE TABLE ... / INSERT ...",
+  "sampleData": "INSERT INTO ...",
+  "createdByUid": "...",
+  "createdAt": "...",
+  "updatedAt": "..."
 }
 ```
+
+Students read published assignments only (rules enforce; drafts never leak). Starting an
+assignment deep-clones `starterErd` into the student's own local project — the template is
+never edited (spec §24). Published assignments are archived, not deleted.
 
 ## submissions/{submissionId}
 
