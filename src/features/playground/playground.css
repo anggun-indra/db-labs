@@ -15,7 +15,7 @@
   margin-bottom: 12px;
   background: var(--dsw-alias-bg-layer-1);
   border: 1px solid var(--dsw-alias-border-l2);
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 .playground-page__grid {
@@ -64,6 +64,6 @@
 
 .sql-editor__monaco {
   border: 1px solid var(--dsw-alias-border-l2);
-  border-radius: 6px;
+  border-radius: 12px;
   overflow: hidden;
 }

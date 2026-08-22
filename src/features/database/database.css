@@ -15,7 +15,7 @@
   margin-bottom: 12px;
   background: var(--dsw-alias-bg-layer-1);
   border: 1px solid var(--dsw-alias-border-l2);
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 .database-page__body {
@@ -26,7 +26,7 @@
 
 .ddl-preview {
   border: 1px solid var(--dsw-alias-border-l2);
-  border-radius: 6px;
+  border-radius: 12px;
   overflow: hidden;
 }
 
@@ -44,7 +44,7 @@
   padding: 12px;
   max-height: 320px;
   overflow: auto;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-family: var(--ds-font-family-code);
   font-size: 12px;
   line-height: 1.5;
   background: var(--dsw-alias-bg-base);
@@ -68,7 +68,7 @@
 
 .schema-explorer__list {
   border: 1px solid var(--dsw-alias-border-l2);
-  border-radius: 6px;
+  border-radius: 12px;
   background: var(--dsw-alias-bg-base);
   overflow: hidden;
 }

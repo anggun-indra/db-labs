@@ -63,9 +63,18 @@ Key mechanics reproduced exactly:
 - [x] Visual snapshot suite: `npm run visual` captures dashboard, settings,
   profile, ERD in light + dark into `docs/design/screenshots/` (8 PNGs)
 
+## Done (round 4) — regression lock + chrome polish
+
+- [x] `e2e/dsw-theme.spec.ts`: 5 automated assertions locking the parity in —
+  light palette, dark palette, Appearance switch + persistence, dsh settings
+  geometry (radius 24 / rail 188px / cell 40px), 16px nav icons
+- [x] Panel radius unified to 12px (playground header, monaco frame,
+  database header, DDL preview, schema explorer list)
+- [x] DDL preview code font switched to the dsw code stack
+      (`--ds-font-family-code`)
+
 ## Next rounds (component parity backlog)
 
-1. SQL Playground + Database page chrome polish (panels, explorer, schema)
-2. Empty states aligned to dsw neutral style
-3. Assignments/Submissions pages pass (tables already token-driven)
-4. Optional: light/dark Playwright regression assertions on computed styles
+1. Empty states aligned to dsw neutral style (AntD Empty already token-driven)
+2. Assignments/Submissions visual pass once cloud fixtures are available
+3. Optional: extend visual snapshot suite to SQL playground/database pages
