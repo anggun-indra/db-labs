@@ -8,6 +8,7 @@ import {
 import { gzipBytes, gunzipBytes, sha256Hex, supportsGzip } from './domain/bytes'
 import { mergeChunks, splitIntoChunks } from './domain/chunking'
 import type { CloudSnapshotAdapter } from '@/lib/firebase/snapshotAdapter'
+import { reportQuotaDiagnostic } from '@/lib/diagnostics/quota'
 
 /**
  * Snapshot orchestration (Phase 5). Corruption safety is mandatory:
@@ -76,6 +77,14 @@ export class SnapshotService {
     }
 
     await this.deps.adapter.writeSnapshot(meta, chunks)
+
+    reportQuotaDiagnostic('snapshot.save', {
+      kind: meta.kind,
+      originalBytes: meta.originalSize,
+      storedBytes: meta.compressedSize,
+      compression: meta.compression,
+      chunkCount: meta.chunkCount
+    })
 
     // Retention: keep only the latest manual snapshot per project.
     // Submission snapshots are owned by Phase 7 and never pruned here.

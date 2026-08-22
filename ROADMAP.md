@@ -1,7 +1,7 @@
 # Roadmap
 
 Phase plans from spec §43. Detailed per-phase planning documents live at the repo root
-(`phase-*.md`). Status as of Phase 7 completion.
+(`phase-*.md`). Status as of Phase 8 completion — release-ready.
 
 | Phase | Scope                                          | Status  | Planning doc                            |
 | ----- | ---------------------------------------------- | ------- | --------------------------------------- |
@@ -13,9 +13,9 @@ Phase plans from spec §43. Detailed per-phase planning documents live at the re
 | 5     | SQLite snapshots via Firestore chunking        | ✅ done | `phase-5-firestore-sqlite-snapshots.md` |
 | 6     | Courses & assignments                          | ✅ done | `phase-6-assignments.md`                |
 | 7     | Submission + lecturer review                   | ✅ done | `phase-7-submission-lecturer-review.md` |
-| 8     | Hardening (rules tests, a11y, PWA tests, docs) | ⏳ next | spec §43                                |
+| 8     | Hardening (rules tests, a11y, PWA tests, docs) | ✅ done | `phase-8-hardening-release.md`           |
 
-## What exists today (Phase 0–7)
+## What exists today (Phase 0–8)
 
 - React 18 + TypeScript strict + Vite 5 PWA (installable, offline app shell, update prompt)
 - Ant Design app shell with student navigation (Dashboard, My Projects)
@@ -60,6 +60,11 @@ Phase plans from spec §43. Detailed per-phase planning documents live at the re
   issues, restore the submitted SQLite into a throwaway local review project (browse + run
   SQL in-browser, no server-side SQL), and grade with score + feedback. Rules restrict
   submission updates to grading fields only
+- Hardening (Phase 8): route-level error boundary with recovery UI, unsupported-browser
+  gate (WebAssembly check), offline PWA validation e2e (app shell re-opens with no
+  network; Firestore never cached), developer quota diagnostics (`[quota]` console
+  lines for sync pushes and snapshot chunk counts), security audit recorded in
+  SECURITY.md, DEPLOYMENT.md + CLASSROOM-GUIDE.md for real classroom rollout
 
 ## Explicit non-goals (spec §38)
 

@@ -90,6 +90,8 @@ export function ErdToolbar({ projectId }: { projectId?: string }) {
           <Tag
             color={syncStatusConfig[syncStatus.state]!.color}
             title={syncStatus.message}
+            role="status"
+            aria-live="polite"
             data-testid="sync-status"
           >
             {syncStatusConfig[syncStatus.state]!.label}

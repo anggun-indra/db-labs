@@ -4,6 +4,8 @@ import { RouterProvider } from 'react-router-dom'
 import { App as AntApp, ConfigProvider } from 'antd'
 import { router } from '@/app/router'
 import { registerServiceWorker } from '@/app/pwa'
+import { AppErrorBoundary, UnsupportedBrowserNotice } from '@/app/ErrorBoundary'
+import { isRuntimeSupported } from '@/app/runtimeSupport'
 import 'antd/dist/reset.css'
 import '@/styles/global.css'
 
@@ -25,7 +27,9 @@ createRoot(rootElement).render(
       }}
     >
       <AntApp>
-        <RouterProvider router={router} />
+        <AppErrorBoundary>
+          {isRuntimeSupported() ? <RouterProvider router={router} /> : <UnsupportedBrowserNotice />}
+        </AppErrorBoundary>
       </AntApp>
     </ConfigProvider>
   </StrictMode>

@@ -20,6 +20,25 @@ npm run test:e2e      # Playwright against the production build (vite preview)
 
 E2E runs against `vite preview` (production build) to approximate Firebase Hosting.
 
+## Firestore rules tests (emulator, opt-in)
+
+Authorization is enforced in `firestore.rules`, verified with
+`@firebase/rules-unit-testing` against a real emulator:
+
+```bash
+# terminal 1
+firebase emulators:start --only firestore   # port 8080
+
+# terminal 2
+npm run test:rules
+```
+
+The suite is opt-in: without `FIRESTORE_EMULATOR_HOST` the rules tests skip
+themselves (CI without the emulator stays green; a plain TCP probe is NOT enough
+because port 8080 can host unrelated services). Coverage: users role documents,
+project ownership, snapshot ownership/immutability, assignment publication
+visibility, submission ownership + grading-only updates.
+
 ## Environment notes
 
 - jsdom lacks `matchMedia`/`ResizeObserver` (needed by antd and React Flow); polyfills live in

@@ -14,13 +14,13 @@ Course: **Manajemen Database / Database Management for Digital Business**.
 | ----- | ------------------------------------- | ------- |
 | 0     | Project foundation                    | ✅ done |
 | 1     | Local ERD designer                    | ✅ done |
-| 2     | SQLite generation (ERD → DDL → WASM)  | ⏳ next |
-| 3     | SQL Playground                        | —       |
-| 4     | Firebase Auth + Firestore projects    | —       |
-| 5     | SQLite Firestore snapshots (chunking) | —       |
-| 6     | Assignments                           | —       |
-| 7     | Submission + lecturer review          | —       |
-| 8     | Hardening (rules, a11y, PWA tests)    | —       |
+| 2     | SQLite generation (ERD → DDL → WASM)  | ✅ done |
+| 3     | SQL Playground                        | ✅ done |
+| 4     | Firebase Auth + Firestore projects    | ✅ done |
+| 5     | SQLite Firestore snapshots (chunking) | ✅ done |
+| 6     | Assignments                           | ✅ done |
+| 7     | Submission + lecturer review          | ✅ done |
+| 8     | Hardening (rules, a11y, PWA tests)    | ✅ done |
 
 ## Quick start
 
@@ -77,4 +77,6 @@ only — see [FIREBASE.md](./FIREBASE.md)).
 - [SECURITY.md](./SECURITY.md) — security principles
 - [TESTING.md](./TESTING.md) — test strategy
 - [ROADMAP.md](./ROADMAP.md) — phase roadmap
+- [DEPLOYMENT.md](./DEPLOYMENT.md) — release steps for the Firebase Spark plan
+- [CLASSROOM-GUIDE.md](./CLASSROOM-GUIDE.md) — lecturer & student classroom workflow
 - [docs/decisions/](./docs/decisions/) — architecture decision records

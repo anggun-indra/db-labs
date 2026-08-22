@@ -42,3 +42,21 @@ Security principles from spec §28 and §39, adapted per phase.
 Phases 0/1 are fully local: no network calls, no accounts, data lives in this browser's
 localStorage. The PWA service worker caches only the application shell — never API/Firestore
 traffic (spec §30).
+
+## Phase 8 security audit (release)
+
+Verified before classroom release:
+
+- ✅ No admin secrets / service-account JSON in the frontend (web config only, git-ignored)
+- ✅ Role enforcement server-side: `users/{uid}.role`, `isLecturer()` in rules; client role is UI-only
+- ✅ Project ownership: `projects/{projectId}` create/update/delete require `ownerUid == auth.uid`
+- ✅ Assignment permissions: students read published only; drafts never leak; lecturers manage own
+- ✅ Submission immutability: students create/read own only; updates restricted to grading fields
+  via `diff().affectedKeys().hasOnly([...])`; deletes denied for everyone
+- ✅ Grading permissions: lecturer-only; students cannot grade themselves (rules + service guard)
+- ✅ Snapshot ownership: read/delete owner-only; chunks inherit parent ownership; metadata immutable
+- ✅ Imported JSON validated: ERD imports pass through zod `erdProjectSchema` before use
+- ✅ Snapshot size limits: 3 MB warn / 5 MB block; 450 KiB chunks stay under the 1 MiB doc limit
+- ✅ Checksum verification: SHA-256 verified before any restore; corruption never imports partially
+
+Rules regression suite: `npm run test:rules` against the Firestore emulator (opt-in; see TESTING.md).

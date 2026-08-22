@@ -1,4 +1,5 @@
 import { erdProjectSchema } from '@/features/erd/domain/schema'
+import { reportQuotaDiagnostic } from '@/lib/diagnostics/quota'
 import type { ProjectRepository } from '@/lib/persistence/localProjectRepository'
 import type { CloudProjectAdapter, RemoteProjectDoc } from './cloudAdapter'
 
@@ -65,6 +66,7 @@ export class ProjectSyncService {
     const uid = this.deps.getUid()
     if (!uid) return
     this.pending.add(projectId)
+    reportQuotaDiagnostic('sync.schedule', { projectId, pending: this.pending.size })
 
     if (!this.deps.isOnline()) {
       this.setStatus({ state: 'offline', message: 'Changes are kept locally and sync later.' })
@@ -127,6 +129,7 @@ export class ProjectSyncService {
         erd: parsed.data
       }
       await this.deps.adapter.pushProject(doc)
+      reportQuotaDiagnostic('sync.push', { projectId })
       this.pending.delete(projectId)
       this.setStatus({ state: this.pending.size > 0 ? 'pending' : 'synced' })
     } catch (error) {
