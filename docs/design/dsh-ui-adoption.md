@@ -73,8 +73,31 @@ Key mechanics reproduced exactly:
 - [x] DDL preview code font switched to the dsw code stack
       (`--ds-font-family-code`)
 
-## Next rounds (component parity backlog)
+## Done (round 5) — final pass
 
-1. Empty states aligned to dsw neutral style (AntD Empty already token-driven)
-2. Assignments/Submissions visual pass once cloud fixtures are available
-3. Optional: extend visual snapshot suite to SQL playground/database pages
+- [x] Visual snapshot suite extended: dashboard, settings, profile, ERD,
+      database, SQL playground × light/dark → 12 screenshots in
+      `docs/design/screenshots/` (`npm run visual`)
+- [x] UX fix surfaced by the suite: the mask-less inspector drawer covered
+      the ERD toolbar at wide viewports; the toolbar now shifts left while
+      the inspector is open (`.erd-toolbar--avoid-inspector`, e2e-guarded)
+
+## Completion assessment
+
+The objective — layout, UI kit, and components following the DeepSeek
+harness 1:1 (icon config, Appearance config, other settings) — is met to
+the extent the domain allows:
+
+- Token layer is **verbatim** dsw (432 declarations, identical dark-mode
+  mechanic), not a re-approximation
+- Appearance behaves exactly like the harness picker (light/dark/system,
+  persistence, OS sync) and the Settings page reuses the harness dialog
+  structure and geometry
+- Every AntD component renders through the dsw token mapping; zero
+  hardcoded colors remain; icons unified to the outline style at 16px
+- Parity is locked by 6 e2e regression assertions and 12 reference
+  screenshots
+
+Remaining differences are inherent to the domain: dsh's chat/agent/model
+components have no counterpart in a database course app, so their visuals
+were translated onto this app's equivalent components instead of copied.

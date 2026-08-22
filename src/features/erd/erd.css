@@ -43,6 +43,16 @@
   flex-wrap: wrap;
 }
 
+/* Keep toolbar actions reachable while the (mask-less) inspector drawer
+   overlaps the right side — mirrors how dsh panels avoid covering primary
+   controls. */
+@media (min-width: 768px) {
+  .erd-toolbar--avoid-inspector {
+    padding-right: 432px; /* inspector 420px + 12px gap */
+    transition: padding 0.2s var(--ds-ease-in-out);
+  }
+}
+
 .erd-toolbar__name {
   font-weight: 600;
   max-width: 260px;

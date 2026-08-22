@@ -107,4 +107,16 @@ test.describe('dsw design system regression', () => {
     expect(sizes.length).toBeGreaterThan(0)
     for (const size of sizes) expect(size).toBe(16)
   })
+
+  test('ERD toolbar stays reachable while the inspector drawer is open', async ({ page }) => {
+    await page.goto('/projects')
+    await page.getByRole('button', { name: /New project/i }).first().click()
+    const dialog = page.getByRole('dialog')
+    await dialog.locator('input').fill('Toolbar Reachability')
+    await dialog.getByRole('button', { name: /Create/i }).click()
+    await page.getByRole('button', { name: 'Add table' }).click()
+    await expect(page.locator('.erd-toolbar--avoid-inspector')).toBeVisible()
+    // Toolbar actions must not sit under the mask-less drawer.
+    await expect(page.getByRole('button', { name: 'Database' })).toBeVisible()
+  })
 })

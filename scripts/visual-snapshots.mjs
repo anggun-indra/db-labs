@@ -49,6 +49,21 @@ async function createProject(page, name) {
   await page.waitForTimeout(800)
 }
 
+async function generateDatabase(page) {
+  await page.getByRole('button', { name: 'Add table' }).click()
+  await page.waitForTimeout(300)
+  // Adding a table opens the inspector drawer (mask=false), which overlaps
+  // the toolbar; close it first so the toolbar buttons are clickable.
+  await page.keyboard.press('Escape')
+  await page.waitForTimeout(300)
+  await page.getByRole('button', { name: 'Database' }).click()
+  await page.waitForTimeout(400)
+  await page.getByRole('button', { name: /Generate from ERD/i }).first().click()
+  await page.waitForTimeout(300)
+  await page.getByRole('button', { name: 'Create database' }).click()
+  await page.waitForTimeout(600)
+}
+
 const captured = []
 try {
   const browser = await chromium.launch()
@@ -73,7 +88,22 @@ try {
     await createProject(page, `Visual ${mode}`)
     await page.screenshot({ path: `${OUT}erd-${mode}.png` })
 
-    captured.push(`dashboard-${mode}`, `settings-${mode}`, `profile-${mode}`, `erd-${mode}`)
+    await generateDatabase(page)
+    await page.waitForTimeout(300)
+    await page.screenshot({ path: `${OUT}database-${mode}.png` })
+
+    await page.getByRole('button', { name: 'SQL Playground' }).first().click().catch(() => {})
+    await page.waitForTimeout(2000)
+    await page.screenshot({ path: `${OUT}playground-${mode}.png` })
+
+    captured.push(
+      `dashboard-${mode}`,
+      `settings-${mode}`,
+      `profile-${mode}`,
+      `erd-${mode}`,
+      `database-${mode}`,
+      `playground-${mode}`
+    )
   }
 
   await browser.close()

@@ -42,6 +42,7 @@ const syncStatusConfig: Record<SyncState, { color: string; label: string } | nul
 export function ErdToolbar({ projectId }: { projectId?: string }) {
   const projectName = useErdEditorStore((s) => s.project?.name ?? '')
   const saveStatus = useErdEditorStore((s) => s.saveStatus)
+  const inspectorOpen = useErdEditorStore((s) => Boolean(s.selectedTableId))
   const canUndo = useErdEditorStore((s) => s.past.length > 0)
   const canRedo = useErdEditorStore((s) => s.future.length > 0)
   const renameProject = useErdEditorStore((s) => s.renameProject)
@@ -70,7 +71,7 @@ export function ErdToolbar({ projectId }: { projectId?: string }) {
   const status = saveStatusConfig[saveStatus]
 
   return (
-    <div className="erd-toolbar">
+    <div className={inspectorOpen ? 'erd-toolbar erd-toolbar--avoid-inspector' : 'erd-toolbar'}>
       <Space size="small">
         <Tooltip title="Back to projects">
           <Link to="/projects">
