@@ -1,6 +1,4 @@
-rules_version = '2';
-
-// Database Learning Lab — Firestore security rules (Phase 4).
+// Database Learning Lab — Firestore security rules (Phase 6+).
 // Principles (spec §28, §35, §39):
 //  - Firebase UID is the canonical identity; no anonymous writes.
 //  - Students own their projects: CRUD only on documents where
@@ -75,7 +73,24 @@ service cloud.firestore {
       allow delete: if isLecturer();
     }
 
-    // Assignments (Phase 6): students read published only; lecturers manage
+    // Course memberships (enrollments) (Phase 6+). Students join automatically,
+    // lecturers manage roles manually. Readable by members only.
+    match /courseMemberships/{membershipId} {
+      allow read: if signedIn()
+        && request.auth.uid == resource.data.uid;
+      
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.role == 'student';
+      
+      allow update: if signedIn()
+        && request.auth.uid == resource.data.uid;
+      
+      allow delete: if signedIn()
+        && request.auth.uid == resource.data.uid;
+    }
+
+    // Assignments (Phase 6+): students read published only; lecturers manage
     // their own. Drafts/archived never leak to students because the read
     // rule requires status == 'published' for non-lecturers.
     match /assignments/{assignmentId} {
@@ -86,6 +101,24 @@ service cloud.firestore {
         && request.resource.data.assignmentId == assignmentId;
       allow update, delete: if isLecturer()
         && resource.data.createdByUid == request.auth.uid;
+    }
+
+    // Task progress (Phase 6+): private per student-task relationship.
+    // Students can record progress on their own tasks; lecturers read all tasks
+    // for their courses. Progress data is immutable except for status updates.
+    match /taskProgress/{progressId} {
+      allow read: if signedIn()
+        && (isLecturer()
+            || resource.data.uid == request.auth.uid);
+      
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid;
+      
+      allow update: if signedIn()
+        && ((resource.data.uid == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'currentStep', 'completedAt']))
+            || (isLecturer() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['score', 'feedback', 'graded'])));
+      
+      allow delete: if false;
     }
 
     // Submissions (Phase 7): frozen snapshots. Students create/read their

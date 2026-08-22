@@ -1,0 +1,60 @@
+================================================================================
+🔧 QUICK GUIDE: Upgrade User QnSeYKDzPbyZLjObLrNpZr4Epedg to Lecturer
+================================================================================
+
+PROBLEM: User is 'student' but should be 'lecturer'
+
+SOLUTION (3 methods):
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ METHOD 1: Firebase Console (FASTEST - RECOMMENDED)                          │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ 1. Go to: https://console.firebase.google.com/project/YOUR_PROJECT_ID/      │
+│    firestore/data                                                            │
+│                                                                              │
+│ 2. Navigate to document: /users/QnSeYKDzPbyZLjObLrNpZr4Epedg                │
+│                                                                              │
+│ 3. Edit field "role" → change from "student" → "lecturer"                   │
+│                                                                              │
+│ 4. Save & logout/user re-login                                              │
+│                                                                              │
+│ ✅ DONE in 2 minutes!                                                        │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ METHOD 2: Automated Script                                                    │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ npm install firebase-admin                                                   │
+│ node scripts/upgrade-role.mjs QnSeYKDzPbyZLjObLrNpZr4Epedg lecturer         │
+│                                                                              │
+│ See full script at: scripts/upgrade-role.mjs                                │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ WHY NOT FROM APP?                                                             │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Firestore security rules prevent client-side role changes (server-side       │
+│ grants only). This is by design to prevent privilege escalation.            │
+│                                                                              │
+│ See: firestore.rules lines ~68                                             │
+│ See: src/stores/authStore.ts ensureProfile()                                │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+VERIFICATION:
+- User sees "Lecturer Dashboard" after login
+- Assignment creation form accessible
+- Grading interface visible
+
+TROUBLESHOOTING:
+Still showing as student?
+→ Clear cache: localStorage.removeItem('dblab:auth-profile:{uid}')
+→ Reload page
+→ Use incognito/private window
+
+DOCUMENTATION:
+See complete guides:
+• FIREBASE-ROLE-UPGRADE.md (detailed tutorial)
+• ROLE-UPGRADE-FLOW.md (visual diagrams)
+• SUMMARY-ROLE-ISSUE.md (analysis summary)
+
+================================================================================

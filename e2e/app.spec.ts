@@ -7,10 +7,16 @@ import { expect, test } from '@playwright/test'
  */
 
 test.describe('app boot and project lifecycle', () => {
-  test('shows the dashboard', async ({ page }) => {
+  test('shows the dashboard with available features', async ({ page }) => {
     await page.goto('/')
     await expect(page.getByText('DBLab').first()).toBeVisible()
-    await expect(page.getByRole('link', { name: /Open my projects/i })).toBeVisible()
+    // ERD Designer ready
+    await expect(page.getByRole('button', { name: /Open my projects/i })).toBeVisible()
+    // SQLite Playground is accessible now (Phase 2–3 complete)
+    await expect(page.getByRole('button', { name: 'Open SQL Playground' })).toBeVisible()
+    // Assignments still coming soon until Firebase configured
+    await expect(page.getByRole('button', { name: 'Coming soon' })).toBeDisabled()
+    await expect(page.locator('.ant-card').filter({ hasText: 'Configure Firebase' })).toBeVisible()
   })
 
   test('creates a project and adds a table', async ({ page }) => {

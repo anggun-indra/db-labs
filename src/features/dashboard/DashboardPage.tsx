@@ -5,8 +5,10 @@ import {
   CloudUploadOutlined,
   ConsoleSqlOutlined,
   DatabaseOutlined,
-  RocketOutlined
+  RocketOutlined,
+  WarningOutlined
 } from '@ant-design/icons'
+import { isFirebaseConfigured } from '@/lib/firebase/config'
 
 /**
  * Student dashboard (spec §33) - intentionally simple for Phase 0/1. It will
@@ -56,15 +58,20 @@ export function DashboardPage() {
                   SQLite Playground
                 </Space>
               }
-              extra={<Tag>Phase 2–3</Tag>}
+              extra={<Tag color="green">Ready</Tag>}
             >
               <Typography.Paragraph type="secondary">
                 Generate CREATE TABLE statements from your ERD, insert data and run real SQL on a
                 SQLite database in your browser.
               </Typography.Paragraph>
-              <Button disabled icon={<ConsoleSqlOutlined />}>
-                Coming soon
-              </Button>
+              <Link to="/projects">
+                <Button type="primary" icon={<ConsoleSqlOutlined />}>
+                  Open SQL Playground
+                </Button>
+              </Link>
+              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                You must open or create a project first to access the database.
+              </Typography.Text>
             </Card>
           </Col>
           <Col xs={24} md={8}>
@@ -75,13 +82,32 @@ export function DashboardPage() {
                   Assignments
                 </Space>
               }
-              extra={<Tag>Phase 4–7</Tag>}
+              extra={<Tag color="blue">Beta</Tag>}
             >
               <Typography.Paragraph type="secondary">
                 Sign in with your campus account, receive assignments and submit your database work
                 to your lecturer.
               </Typography.Paragraph>
-              <Button disabled>Coming soon</Button>
+              {!isFirebaseConfigured() ? (
+                <>
+                  <Button
+                    danger
+                    icon={<WarningOutlined />}
+                    disabled
+                  >
+                    Coming soon
+                  </Button>
+                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                    Configure Firebase Connection in Settings first.
+                  </Typography.Text>
+                </>
+              ) : (
+                <Link to="/assignments">
+                  <Button type="primary" icon={<RocketOutlined />}>
+                    View Assignments
+                  </Button>
+                </Link>
+              )}
             </Card>
           </Col>
         </Row>
