@@ -20,22 +20,24 @@ Auth (email/password) + Firestore + Hosting. No Storage, no Blaze plan.
 ## 2. Register the web app and copy config
 
 1. Project settings → **Your apps → Web** → register app (no Hosting checkbox needed).
-2. Copy the `firebaseConfig` values. Create `firebase.local.json` at the repo root:
+2. Copy the `firebaseConfig` values into a git-ignored `.env.local` at the repo root:
 
-```json
-{
-  "apiKey": "...",
-  "authDomain": "your-project.firebaseapp.com",
-  "projectId": "your-project",
-  "storageBucket": "your-project.appspot.com",
-  "messagingSenderId": "...",
-  "appId": "..."
-}
+```bash
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project
+VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=...
+VITE_FIREBASE_APP_ID=...
 ```
 
-`firebase.local.json` is git-ignored. **These are public web keys, not secrets —
-never place a service-account JSON in this repo (spec §38).** Without the file the
-app automatically runs in local-only mode.
+`.env.local` is git-ignored (`*.local`). **These are public web keys, not secrets —
+never place a service-account JSON in this repo (spec §38).** Without the variables
+the app automatically runs in local-only mode.
+
+For local testing against the Firebase emulators, additionally set
+`VITE_FIREBASE_AUTH_EMULATOR_URL` and `VITE_FIRESTORE_EMULATOR_HOST` (see `.env.local`
+workflow in TESTING.md); leave them unset for production builds.
 
 ## 3. Deploy security rules first
 

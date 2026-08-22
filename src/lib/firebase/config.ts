@@ -1,4 +1,6 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app'
+import { connectAuthEmulator, getAuth } from 'firebase/auth'
+import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore'
 
 /**
  * Firebase configuration scaffold (spec §43 Phase 0).
@@ -33,6 +35,15 @@ export const firebaseConfig: FirebaseWebConfig = {
   appId: env.VITE_FIREBASE_APP_ID ?? ''
 }
 
+/**
+ * Local emulator hookup (Phase 8 developer workflow). When these are set —
+ * normally via a git-ignored `.env.local` — the app talks to the Firebase
+ * emulators instead of the cloud. They stay empty in production builds, so
+ * deployed apps always use real Firebase.
+ */
+const authEmulatorUrl: string = env.VITE_FIREBASE_AUTH_EMULATOR_URL ?? ''
+const firestoreEmulatorHost: string = env.VITE_FIRESTORE_EMULATOR_HOST ?? ''
+
 export function isFirebaseConfigured(): boolean {
   return Boolean(firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId)
 }
@@ -44,6 +55,13 @@ export function getFirebaseApp(): FirebaseApp | null {
   if (!isFirebaseConfigured()) return null
   if (!app) {
     app = initializeApp(firebaseConfig)
+    if (authEmulatorUrl) {
+      connectAuthEmulator(getAuth(app), authEmulatorUrl, { disableWarnings: true })
+    }
+    if (firestoreEmulatorHost) {
+      const [host, portRaw] = firestoreEmulatorHost.split(':')
+      connectFirestoreEmulator(getFirestore(app), host, Number(portRaw || 8080))
+    }
   }
   return app
 }
