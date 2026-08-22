@@ -17,7 +17,7 @@ import {
   ArrowLeftOutlined,
   ConsoleSqlOutlined,
   DownloadOutlined,
-  ExclamationCircleFilled,
+  ExclamationCircleOutlined,
   FileAddOutlined,
   ImportOutlined,
   ReloadOutlined,
@@ -152,7 +152,7 @@ export function DatabasePage() {
     if (!projectId) return
     Modal.confirm({
       title: 'Delete this database?',
-      icon: <ExclamationCircleFilled />,
+      icon: <ExclamationCircleOutlined />,
       content:
         'This removes the local SQLite database for this project. The ERD is not affected. Export a backup first if you need the data.',
       okText: 'Delete database',

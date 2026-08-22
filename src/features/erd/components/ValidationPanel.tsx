@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react'
 import { Badge, Empty, List, Space, Tag, Typography } from 'antd'
-import { CloseCircleFilled, ExclamationCircleFilled, InfoCircleFilled } from '@ant-design/icons'
+import { CloseCircleOutlined, ExclamationCircleOutlined, InfoCircleOutlined } from '@ant-design/icons'
 import { validateErd } from '@/features/erd/domain/validate'
 import type { ValidationIssue } from '@/features/erd/domain/schema'
 import { useErdEditorStore } from '@/stores/erdEditorStore'
 
 const severityIcon = {
-  error: <CloseCircleFilled style={{ color: 'var(--dsw-alias-state-error-primary)' }} />,
-  warning: <ExclamationCircleFilled style={{ color: 'var(--dsw-alias-state-warn-primary)' }} />,
-  info: <InfoCircleFilled style={{ color: 'var(--dsw-static-deepseek-450)' }} />
+  error: <CloseCircleOutlined style={{ color: 'var(--dsw-alias-state-error-primary)' }} />,
+  warning: <ExclamationCircleOutlined style={{ color: 'var(--dsw-alias-state-warn-primary)' }} />,
+  info: <InfoCircleOutlined style={{ color: 'var(--dsw-static-deepseek-450)' }} />
 } as const
 
 const severityTagColor = {

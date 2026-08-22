@@ -55,11 +55,17 @@ Key mechanics reproduced exactly:
 - [x] Verified: full gates green; ERD editor computed colors match the dark
       palette (toolbar #232324, canvas #151517, border-l1 white/12%)
 
+## Done (round 3) — icon config + visual evidence
+
+- [x] Icon config normalized: no filled/two-tone icons remain; status icons
+  (ValidationPanel, DatabasePage) converted to Outlined — single outline
+  style across nav, toolbars, and status surfaces; nav/toolbar icons 16px
+- [x] Visual snapshot suite: `npm run visual` captures dashboard, settings,
+  profile, ERD in light + dark into `docs/design/screenshots/` (8 PNGs)
+
 ## Next rounds (component parity backlog)
 
-1. Icon configuration: adopt a single 16px outline icon style across nav +
-   toolbars; audit for filled/outlined mixing
-2. Profile page restyle (cards, auth forms) to dsw tokens
-3. SQL Playground + Database page chrome polish (panels, explorer, schema)
-4. Modals/drawers/message visual regression screenshots per page (light+dark)
-5. Empty states + illustrations aligned to dsw neutral style
+1. SQL Playground + Database page chrome polish (panels, explorer, schema)
+2. Empty states aligned to dsw neutral style
+3. Assignments/Submissions pages pass (tables already token-driven)
+4. Optional: light/dark Playwright regression assertions on computed styles
