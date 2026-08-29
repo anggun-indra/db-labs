@@ -214,43 +214,15 @@ export function StudentAssignments() {
                 <Card
                   title={assignment.title}
                   size="small"
+                  style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+                  bodyStyle={{ flex: 1, display: 'flex', flexDirection: 'column' }}
                   extra={
                     <Tag color={overdue ? 'red' : 'blue'}>
                       {formatDueDate(assignment.dueAt)}
                     </Tag>
                   }
-                  actions={[
-                    <Button
-                      key="details"
-                      type="link"
-                      onClick={() => setDetail(assignment)}
-                    >
-                      Details
-                    </Button>,
-                    progress === 'not-started' ? (
-                      <Button
-                        key="start"
-                        type="primary"
-                        icon={<PlayCircleOutlined />}
-                        loading={starting}
-                        onClick={() => void handleStart(assignment)}
-                        data-testid="start-assignment"
-                      >
-                        Start
-                      </Button>
-                    ) : (
-                      <Button
-                        key="open"
-                        type="primary"
-                        icon={<RocketOutlined />}
-                        onClick={() => link && navigate(`/projects/${link.projectId}/erd`)}
-                      >
-                        Open project
-                      </Button>
-                    )
-                  ]}
                 >
-                  <Space direction="vertical" size={4}>
+                  <Space direction="vertical" size={4} style={{ width: '100%' }}>
                     <Typography.Text type="secondary">
                       {courseTitle(assignment.courseId)}
                     </Typography.Text>
@@ -278,6 +250,35 @@ export function StudentAssignments() {
                           : 'Not started'}
                     </Tag>
                   </Space>
+                  <div style={{ marginTop: 'auto', paddingTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    <Button
+                      size="small"
+                      onClick={() => setDetail(assignment)}
+                    >
+                      Details
+                    </Button>
+                    {progress === 'not-started' ? (
+                      <Button
+                        size="small"
+                        type="primary"
+                        icon={<PlayCircleOutlined />}
+                        loading={starting}
+                        onClick={() => void handleStart(assignment)}
+                        data-testid="start-assignment"
+                      >
+                        Start
+                      </Button>
+                    ) : (
+                      <Button
+                        size="small"
+                        type="primary"
+                        icon={<RocketOutlined />}
+                        onClick={() => link && navigate(`/projects/${link.projectId}/erd`)}
+                      >
+                        Open project
+                      </Button>
+                    )}
+                  </div>
                 </Card>
               </List.Item>
             )
@@ -289,7 +290,8 @@ export function StudentAssignments() {
         title={detail?.title}
         open={detail !== null}
         onClose={() => setDetail(null)}
-        width={520}
+        width="min(520px, 100vw)"
+        style={{ maxWidth: '100vw' }}
       >
         {detail && (
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>

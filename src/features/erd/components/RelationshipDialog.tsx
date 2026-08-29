@@ -91,6 +91,7 @@ export function RelationshipDialog() {
           onChange={(e) => setCardinality(e.target.value as Cardinality)}
           optionType="button"
           buttonStyle="solid"
+          style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}
         >
           <Radio.Button value="many-to-one">Many-to-one (N:1)</Radio.Button>
           <Radio.Button value="one-to-many">One-to-many (1:N)</Radio.Button>

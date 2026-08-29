@@ -1,169 +1,347 @@
-/**
- * Course detail page (Phase 6+).
- * Shows course info, enrolled students, available assignments.
- * Lecturers can manage members; students see their progress.
- */
 import { useCallback, useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { Button, Card, Col, Row, Space, Table, Tag, Typography, Avatar, Input, Modal, message, Tabs } from 'antd'
 import { 
-  BookOutlined, 
-  UserGroupOutlined, 
-  CheckCircleOutlined, 
-  ClockCircleOutlined,
-  RocketOutlined,
-  PlusOutlined,
-  SettingOutlined
+  Button, Card, Row, Col, Typography, Divider, List, Tag, Space, Spin, 
+  message, Alert, Modal, Form, Input, Avatar 
+} from 'antd'
+import { 
+  ArrowLeftOutlined, BookOutlined, CheckCircleOutlined, UserOutlined, 
+  CalendarOutlined, FileTextOutlined, CopyOutlined, LockOutlined, 
+  AppstoreOutlined 
 } from '@ant-design/icons'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import { getAssignmentService } from '@/lib/firebase/assignmentInstance'
+import { getAdapters } from '@/lib/firebase/config'
 import { useAuthStore } from '@/stores/authStore'
-import { useCourseService } from '@/lib/firebase/courseAdapter'
-import type { CourseWithMembers, CourseMember } from '@/lib/firebase/courseAdapter'
+import type { Assignment, Course } from '@/features/assignments/domain/assignmentModel'
+import { formatDueDate } from '@/features/assignments/domain/assignmentModel'
 
-export function CourseDetailPage() {
-  const { courseId } = useParams()
+const { Paragraph, Text, Title } = Typography
+
+export function CourseDetailPage(): JSX.Element {
+  const { courseId } = useParams<{ courseId: string }>()
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
-  const courseService = useCourseService()
-  
-  const [course, setCourse] = useState<CourseWithMembers | null>(null)
-  const [members, setMembers] = useState<CourseMember[]>([])
+  const isLecturer = user?.role === 'lecturer' || user?.role === 'super_admin' || user?.role === 'admin'
+
+  const [course, setCourse] = useState<Course | null>(null)
+  const [creatorProfile, setCreatorProfile] = useState<{ displayName?: string; email?: string } | null>(null)
+  const [assignments, setAssignments] = useState<Assignment[]>([])
   const [loading, setLoading] = useState(true)
-  const [enrollmentOpen, setEnrollmentOpen] = useState(false)
-  const [joining, setJoining] = useState(false)
-  const myRole = useAuthStore((s) => s.user?.role ?? 'student')
+  
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false)
+  const [duplicateLoading, setDuplicateLoading] = useState(false)
+  const [duplicateForm] = Form.useForm()
 
-  useEffect(() => {
-    loadCourse()
-    if (myRole === 'lecturer') {
-      loadMembers()
-    }
-  }, [courseId])
-
-  async function loadCourse() {
+  const loadData = useCallback(async () => {
+    if (!courseId) return
     try {
-      const c = await courseService.getCourse(courseId!)
-      setCourse(c)
-      setLoading(false)
-    } catch (error) {
-      console.error(error)
-      message.error('Failed to load course')
-    }
-  }
+      setLoading(true)
+      const service = getAssignmentService()
+      const courseData = await service.getCourse(courseId)
+      setCourse(courseData)
 
-  async function loadMembers() {
-    const m = await courseService.getMembers(courseId!, undefined)
-    setMembers(m)
-  }
+      if (courseData) {
+        // Fetch creator profile
+        const adapters = getAdapters()
+        if (adapters && courseData.lecturerUid) {
+          try {
+            const p = await adapters.users.loadProfile(courseData.lecturerUid)
+            if (p) setCreatorProfile({ displayName: p.displayName, email: p.email })
+          } catch {
+            // ignore
+          }
+        }
 
-  async function handleJoin() {
-    try {
-      setJoining(true)
-      await courseService.joinCourse(courseId!, user!.uid)
-      message.success('Joined course! Go check your assignments.')
-      setEnrollmentOpen(false)
-      loadCourse()
-    } catch (error) {
-      console.error(error)
-      message.error('Failed to join course')
-    } finally {
-      setJoining(false)
-    }
-  }
-
-  async function handleLeave() {
-    Modal.confirm({
-      title: 'Leave course?',
-      content: 'You will lose access to this course and its assignments.',
-      onOk: async () => {
-        try {
-          await courseService.leaveCourse(courseId!, user!.uid)
-          message.success('Left course successfully')
-          navigate('/courses')
-        } catch (error) {
-          console.error(error)
-          message.error('Failed to leave course')
+        // Fetch assignments for this course
+        if (isLecturer) {
+          const list = await service.listAssignmentsForCourse(courseId)
+          setAssignments(list)
+        } else {
+          const published = await service.listPublished()
+          setAssignments(published.filter((a) => a.courseId === courseId))
         }
       }
-    })
+    } catch (error) {
+      console.error(error)
+      message.error('Gagal memuat detail kursus')
+    } finally {
+      setLoading(false)
+    }
+  }, [courseId, isLecturer])
+
+  useEffect(() => {
+    void loadData()
+  }, [loadData])
+
+  const isOwner = user && (course?.lecturerUid === user.uid || user.role === 'super_admin' || user.role === 'admin')
+
+  const lecturerDisplayName =
+    user && course?.lecturerUid === user.uid
+      ? user.displayName || user.email || 'Anda'
+      : creatorProfile?.displayName || creatorProfile?.email || `Instruktur (${course?.lecturerUid?.slice(0, 6)}...)`
+
+  async function handleDuplicate(values: { title: string }): Promise<void> {
+    if (!courseId) return
+    try {
+      setDuplicateLoading(true)
+      const duplicated = await getAssignmentService().duplicateCourse(courseId, values.title.trim())
+      message.success(`Kursus "${duplicated.title}" berhasil diduplikasi ke Kursus Saya!`)
+      setShowDuplicateModal(false)
+      duplicateForm.resetFields()
+      navigate(`/courses/${duplicated.courseId}`)
+    } catch (err) {
+      console.error(err)
+      message.error(err instanceof Error ? err.message : 'Gagal menduplikasi kursus')
+    } finally {
+      setDuplicateLoading(false)
+    }
   }
 
-  if (!course || loading) return <div>Loading...</div>
+  if (!courseId) return <Title level={3}>Kursus tidak ditemukan</Title>
 
-  const isStudent = myRole === 'student'
-  const isInCourse = members.some(m => m.uid === user?.uid)
+  if (loading) {
+    return (
+      <div className="page-centered" style={{ textAlign: 'center', padding: '60px 0' }}>
+        <Spin size="large" />
+        <div style={{ marginTop: 16 }}>
+          <Text type="secondary">Memuat detail kursus...</Text>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="page-narrow">
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        {/* Course Header */}
-        <Card
-          extra={
-            <Space>
-              {isStudent && !isInCourse ? (
-                <Button type="primary" onClick={() => setEnrollmentOpen(true)}>
-                  Join Course
+    <div className="page-narrow" style={{ maxWidth: 1200, margin: '0 auto', padding: '16px' }}>
+      <Button icon={<ArrowLeftOutlined />} style={{ marginBottom: 16 }} onClick={() => navigate('/courses')}>
+        Kembali ke Daftar Kursus
+      </Button>
+
+      {/* Read-Only Notice for other lecturers */}
+      {isLecturer && !isOwner && (
+        <Alert
+          type="info"
+          showIcon
+          icon={<LockOutlined />}
+          style={{ marginBottom: 20 }}
+          message="Katalog Kursus Instruktur Lain (Mode Lihat Saja)"
+          description={
+            <div style={{ marginTop: 4 }}>
+              <span>
+                Kursus ini dibuat oleh <strong>{lecturerDisplayName}</strong>. Anda dapat melihat modul tugas di bawah ini untuk referensi materi praktikum. Jika ingin mengajar kelas ini, silakan <strong>duplikasi kursus</strong> ke koleksi Kursus Saya.
+              </span>
+              <div style={{ marginTop: 12 }}>
+                <Button
+                  type="primary"
+                  icon={<CopyOutlined />}
+                  onClick={() => {
+                    duplicateForm.setFieldsValue({ title: `${course?.title || 'Kursus'} (Salinan)` })
+                    setShowDuplicateModal(true)
+                  }}
+                >
+                  Duplikasi Kursus Ini ke Kursus Saya
                 </Button>
-              ) : (
-                <>
-                  <Tag icon={<BookOutlined />} color="blue">
-                    {course.memberCount || 0} enrolled
+              </div>
+            </div>
+          }
+        />
+      )}
+
+      <Row gutter={[24, 24]}>
+        <Col xs={24} lg={16}>
+          <Card
+            title={
+              <Space align="center">
+                <BookOutlined style={{ color: '#1677ff' }} />
+                <span>{course?.title ?? courseId}</span>
+              </Space>
+            }
+            bordered={false}
+            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
+            extra={
+              <Space wrap>
+                {isOwner ? (
+                  <Tag color="green">
+                    <CheckCircleOutlined /> Kursus Anda
                   </Tag>
-                  {isInCourse && (
-                    <Button danger onClick={handleLeave}>
-                      Leave Course
-                    </Button>
+                ) : (
+                  <Tag color="orange" icon={<LockOutlined />}>
+                    Read-Only
+                  </Tag>
+                )}
+                <Tag color="blue">{assignments.length} Modul Tugas</Tag>
+              </Space>
+            }
+          >
+            <Paragraph style={{ fontSize: 15, lineHeight: 1.6 }}>
+              {course?.description || 'Belum ada deskripsi untuk kursus ini.'}
+            </Paragraph>
+
+            <Divider style={{ margin: '16px 0' }} />
+
+            <Space wrap split={<Divider type="vertical" />}>
+              <Text type="secondary">
+                <CalendarOutlined /> Dibuat:{' '}
+                {course?.createdAt
+                  ? new Date(course.createdAt).toLocaleDateString('id-ID', { dateStyle: 'medium' })
+                  : '-'}
+              </Text>
+              <Space align="center" size={6}>
+                <Avatar size="small" icon={<UserOutlined />} style={{ background: '#1677ff' }} />
+                <Text type="secondary">
+                  Dosen Pengampu: <strong>{lecturerDisplayName}</strong>
+                  {creatorProfile?.email ? ` (${creatorProfile.email})` : ''}
+                </Text>
+              </Space>
+            </Space>
+          </Card>
+
+          <Card
+            title={
+              <Space>
+                <CheckCircleOutlined style={{ color: '#52c41a' }} />
+                <span>Daftar Modul Tugas & Praktikum Lab ({assignments.length})</span>
+              </Space>
+            }
+            style={{ marginTop: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
+            extra={
+              isOwner && (
+                <Button type="link" onClick={() => navigate('/assignments')}>
+                  Kelola di Halaman Tugas →
+                </Button>
+              )
+            }
+          >
+            <List
+              locale={{ emptyText: 'Belum ada tugas pada kursus ini.' }}
+              dataSource={assignments}
+              renderItem={(item) => (
+                <List.Item
+                  key={item.assignmentId}
+                  actions={[
+                    <Link to="/assignments" key="view">
+                      <Button type="primary" size="small" icon={<FileTextOutlined />}>
+                        Buka Tugas
+                      </Button>
+                    </Link>
+                  ]}
+                >
+                  <List.Item.Meta
+                    title={
+                      <Space>
+                        <Text strong>{item.title}</Text>
+                        <Tag color={item.status === 'published' ? 'green' : 'orange'}>{item.status}</Tag>
+                      </Space>
+                    }
+                    description={
+                      <div>
+                        <div>{item.description}</div>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          Tenggat Waktu: {formatDueDate(item.dueAt)}
+                        </Text>
+                      </div>
+                    }
+                  />
+                </List.Item>
+              )}
+            />
+          </Card>
+        </Col>
+
+        <Col xs={24} lg={8}>
+          <Card
+            title={
+              <Space>
+                <AppstoreOutlined />
+                <span>Informasi Kelas</span>
+              </Space>
+            }
+            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
+          >
+            <Space direction="vertical" style={{ width: '100%' }} size="middle">
+              <div>
+                <Text type="secondary">Kode / ID Kursus</Text>
+                <div style={{ fontWeight: 600, fontSize: 15 }}>{courseId}</div>
+              </div>
+
+              <div>
+                <Text type="secondary">Status Kepemilikan</Text>
+                <div>
+                  {isOwner ? (
+                    <Tag color="green">Pemilik Kursus (Dapat Mengedit & Menilai)</Tag>
+                  ) : (
+                    <Tag color="orange">Katalog Instruktur Lain (Lihat Saja)</Tag>
                   )}
-                </>
+                </div>
+              </div>
+
+              <Divider style={{ margin: '8px 0' }} />
+
+              {isLecturer && !isOwner && (
+                <Button
+                  type="primary"
+                  icon={<CopyOutlined />}
+                  block
+                  onClick={() => {
+                    duplicateForm.setFieldsValue({ title: `${course?.title || 'Kursus'} (Salinan)` })
+                    setShowDuplicateModal(true)
+                  }}
+                >
+                  Duplikasi ke Kursus Saya
+                </Button>
+              )}
+
+              {isOwner && (
+                <Button type="primary" block onClick={() => navigate('/assignments')}>
+                  Buka Halaman Tugas & Penilaian →
+                </Button>
               )}
             </Space>
-          }
-        >
-          <Typography.Title level={2} style={{ marginBottom: 8 }}>
-            {course.title}
-          </Typography.Title>
-          <Typography.Paragraph type="secondary">
-            {course.description || 'No description provided.'}
-          </Typography.Paragraph>
-        </Card>
+          </Card>
+        </Col>
+      </Row>
 
-        {/* Assignments Tab */}
-        <Tabs defaultActiveKey="assignments">
-          <Tabs.TabPane
-            tab={<><RocketOutlined /> Available Assignments</>}
-            key="assignments"
+      {/* Duplicate Course Modal */}
+      <Modal
+        title={
+          <Space>
+            <CopyOutlined style={{ color: '#52c41a' }} />
+            <span>Duplikasi Kursus ke Kursus Saya</span>
+          </Space>
+        }
+        open={showDuplicateModal}
+        width="min(520px, 95vw)"
+        onCancel={() => {
+          setShowDuplicateModal(false)
+          duplicateForm.resetFields()
+        }}
+        footer={[
+          <Button key="cancel" onClick={() => setShowDuplicateModal(false)}>
+            Batal
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            icon={<CopyOutlined />}
+            loading={duplicateLoading}
+            onClick={() => duplicateForm.submit()}
           >
-            <AssignmentList courseId={courseId!} />
-          </Tabs.TabPane>
-
-          {/* Members Tab (lecturer only) */}
-          {myRole === 'lecturer' && (
-            <Tabs.TabPane
-              tab={<><UserGroupOutlined /> Enrolled Students</>}
-              key="members"
-            >
-              <MemberList members={members} />
-            </Tabs.TabPane>
-          )}
-        </Tabs>
-      </Space>
+            Duplikasi Sekarang
+          </Button>
+        ]}
+      >
+        <Paragraph type="secondary">
+          Sistem akan membuat salinan kursus & seluruh modul tugas di dalamnya ke dalam akun Anda dengan status <strong>Draft</strong>.
+        </Paragraph>
+        <Form form={duplicateForm} layout="vertical" onFinish={handleDuplicate}>
+          <Form.Item
+            label="Judul Kursus Baru"
+            name="title"
+            rules={[{ required: true, message: 'Masukkan judul kursus baru' }]}
+          >
+            <Input prefix={<BookOutlined />} autoFocus />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   )
-}
-
-// Helper component for member list
-function MemberList({ members }: { members: CourseMember[] }) {
-  const columns = [
-    { title: 'Name', dataIndex: 'name', key: 'name' },
-    { title: 'Email', dataIndex: 'email', key: 'email' },
-    { title: 'Role', key: 'role', render: (role: string) => <Tag>{role}</Tag> },
-    { title: 'Joined', key: 'joinedAt', render: (v: string) => new Date(v).toLocaleDateString() }
-  ]
-
-  return <Table dataSource={members} columns={columns} rowKey="membershipId" pagination={false} />
-}
-
-// Helper component for assignment list
-function AssignmentList({ courseId }: { courseId: string }) {
-  // Will be implemented in next iteration
-  return <Typography.Text type="secondary">Loading assignments...</Typography.Text>
 }

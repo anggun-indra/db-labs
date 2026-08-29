@@ -28,11 +28,25 @@ class FakeAssignmentAdapter implements AssignmentAdapter {
   async listCourses(): Promise<Course[]> {
     return this.courses
   }
+  async getCourse(courseId: string): Promise<Course | null> {
+    return this.courses.find((c) => c.courseId === courseId) ?? null
+  }
+  async writeCourse(course: Course): Promise<void> {
+    const idx = this.courses.findIndex((c) => c.courseId === course.courseId)
+    if (idx >= 0) this.courses[idx] = course
+    else this.courses.push(course)
+  }
+  async deleteCourse(courseId: string): Promise<void> {
+    this.courses = this.courses.filter((c) => c.courseId !== courseId)
+  }
   async listPublishedAssignments(): Promise<Assignment[]> {
     return [...this.assignments.values()].filter((a) => a.status === 'published')
   }
   async listLecturerAssignments(lecturerUid: string): Promise<Assignment[]> {
     return [...this.assignments.values()].filter((a) => a.createdByUid === lecturerUid)
+  }
+  async listAssignmentsForCourse(courseId: string): Promise<Assignment[]> {
+    return [...this.assignments.values()].filter((a) => a.courseId === courseId)
   }
   async readAssignment(assignmentId: string): Promise<Assignment | null> {
     return this.assignments.get(assignmentId) ?? null
@@ -44,6 +58,7 @@ class FakeAssignmentAdapter implements AssignmentAdapter {
     this.assignments.delete(assignmentId)
   }
 }
+
 
 function makeService(opts: { uid?: string | null; role?: 'student' | 'lecturer' | null } = {}) {
   const adapter = new FakeAssignmentAdapter()
@@ -229,4 +244,68 @@ describe('AssignmentService authorization guards', () => {
     const visible = await studentService.listPublished()
     expect(visible.map((a) => a.title)).toEqual(['Marketplace Database'])
   })
+
+  it('supports creating and retrieving courses for lecturers', async () => {
+    const { service } = makeService()
+    const course = await service.createCourse({
+      courseId: 'c-test',
+      title: 'Basis Data Lanjut',
+      description: 'Materi SQL tingkat lanjut'
+    })
+    expect(course.courseId).toBe('c-test')
+    expect(course.title).toBe('Basis Data Lanjut')
+
+    const fetched = await service.getCourse('c-test')
+    expect(fetched?.title).toBe('Basis Data Lanjut')
+
+    const list = await service.listCourses()
+    expect(list.some((c) => c.courseId === 'c-test')).toBe(true)
+
+    await service.deleteCourse('c-test')
+    expect(await service.getCourse('c-test')).toBeNull()
+  })
+
+  it('updates course if user is owner', async () => {
+    const { service } = makeService({ uid: 'lec-1' })
+    const updated = await service.updateCourse('c1', {
+      title: 'Manajemen Database Revisi',
+      description: 'Deskripsi baru'
+    })
+    expect(updated.title).toBe('Manajemen Database Revisi')
+    expect(updated.description).toBe('Deskripsi baru')
+
+    const nonOwnerService = new AssignmentService({
+      adapter: (service as unknown as { deps: { adapter: AssignmentAdapter } }).deps.adapter,
+      getUid: () => 'lec-other',
+      getRole: () => 'lecturer'
+    })
+    await expect(
+      nonOwnerService.updateCourse('c1', { title: 'Hijacked title' })
+    ).rejects.toThrow(/owner or super admin/i)
+  })
+
+  it('duplicates course and its assignments for the requesting lecturer', async () => {
+    const { service } = makeService({ uid: 'lec-2' })
+    // Seed an assignment in course c1
+    await service.create({
+      ...validInput,
+      assignmentId: 'asg-source-1',
+      courseId: 'c1',
+      title: 'Modul SQL 1'
+    })
+
+    const duplicated = await service.duplicateCourse('c1', 'Manajemen DB Kloning')
+    expect(duplicated.courseId).not.toBe('c1')
+    expect(duplicated.title).toBe('Manajemen DB Kloning')
+    expect(duplicated.lecturerUid).toBe('lec-2')
+
+    // Verify duplicated assignment
+    const duplicatedAssignments = await service.listAssignmentsForCourse(duplicated.courseId)
+    expect(duplicatedAssignments.length).toBe(1)
+    expect(duplicatedAssignments[0].courseId).toBe(duplicated.courseId)
+    expect(duplicatedAssignments[0].createdByUid).toBe('lec-2')
+    expect(duplicatedAssignments[0].status).toBe('draft')
+    expect(duplicatedAssignments[0].title).toBe('Modul SQL 1')
+  })
 })
+

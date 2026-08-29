@@ -17,8 +17,15 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'prompt',
-      includeAssets: ['favicon.svg'],
+      registerType: 'autoUpdate',
+      includeAssets: [
+        'favicon.svg',
+        'apple-touch-icon.png',
+        'pwa-192x192.png',
+        'pwa-512x512.png',
+        'pwa-maskable-192x192.png',
+        'pwa-maskable-512x512.png'
+      ],
       manifest: {
         name: 'DBLab',
         short_name: 'DB Lab',
@@ -30,18 +37,34 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: 'pwa-192x192.png',
+            src: '/pwa-192x192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any'
           },
           {
-            src: 'pwa-512x512.png',
+            src: '/pwa-maskable-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable'
+          },
+          {
+            src: '/pwa-512x512.png',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/pwa-maskable-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
           }
         ]
       },
       workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
         // Cache the application shell; do NOT aggressively cache Firestore/API
         // responses (spec §30). Firebase SDK manages its own network behavior.
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,wasm}'],
@@ -54,8 +77,10 @@ export default defineConfig({
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//]
       },
+
       devOptions: {
-        enabled: false
+        enabled: true,
+        type: 'module'
       }
     })
   ],
@@ -65,7 +90,9 @@ export default defineConfig({
     }
   },
   define: {
-    __APP_VERSION__: JSON.stringify(pkg.version)
+    __APP_VERSION__: JSON.stringify(pkg.version),
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+    __BUILD_HASH__: JSON.stringify(Math.random().toString(36).slice(2, 9))
   },
   build: {
     rollupOptions: {

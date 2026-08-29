@@ -69,5 +69,9 @@ JSON
 fi
 
 echo "[emulators] Auth: 127.0.0.1:9099 | Firestore: 127.0.0.1:$FIRESTORE_PORT | UI: http://127.0.0.1:4000"
-echo "[emulators] rules tests: FIRESTORE_EMULATOR_HOST=127.0.0.1:$FIRESTORE_PORT npm run test:rules"
-exec npx firebase emulators:start --config "$CONFIG" --project "${FIREBASE_EMULATOR_PROJECT:-demo-dblab}"
+if command -v firebase >/dev/null 2>&1; then
+  exec firebase emulators:start --config "$CONFIG" --project "${FIREBASE_EMULATOR_PROJECT:-demo-dblab}"
+else
+  exec npx -y firebase-tools emulators:start --config "$CONFIG" --project "${FIREBASE_EMULATOR_PROJECT:-demo-dblab}"
+fi
+

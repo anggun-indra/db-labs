@@ -63,12 +63,14 @@ export const taskProgressSchema = z.object({
   uid: z.string().min(1),
   startedAt: z.string().nullable().default(null),
   completedAt: z.string().nullable().default(null),
-  status: z.literal('pending' as const | 'in-progress' as const | 'completed' as const),
+  status: z.enum(TASK_STATUSES).default('pending'),
   currentStep: z.number().int().min(0).default(0),
   notes: z.string().default(''),
   submitted: z.boolean().default(false),
   graded: z.boolean().default(false),
   score: z.number().int().min(0).nullable().default(null),
+  maxScore: z.number().int().min(0).default(100),
+  dueDate: z.string().nullable().default(null),
   feedback: z.string().default('')
 })
 
@@ -94,12 +96,32 @@ export function getTotalScore(progresses: TaskProgress[]): number | null {
   const scored = progresses.filter(p => p.score !== null)
   if (scored.length === 0) return null
   
-  const total = scored.reduce((sum: number, p: TaskProgress) => sum + (p.score || 0), 0)
-  const maxPossible = progresses.reduce((sum: number, p: TaskProgress) => sum + p.maxScore, 0)
+  const total = scored.reduce((sum: number, p: TaskProgress) => sum + (p.score ?? 0), 0)
+  const maxPossible = progresses.reduce((sum: number, p: TaskProgress) => sum + (p.maxScore ?? 100), 0)
   
-  return Math.round((total / maxPossible) * 100)
+  return maxPossible > 0 ? Math.round((total / maxPossible) * 100) : 0
 }
+
 
 export function hasCompletionCriteriaMet(progresses: TaskProgress[]): boolean {
   return progresses.every(p => p.status === 'completed' && p.submitted)
 }
+
+// Re-export assignment schema for backward compatibility  
+import { assignmentSchema } from './assignmentModel'
+export const enhancedAssignmentSchema = assignmentSchema.extend({
+  tasks: z.array(assignmentTaskSchema).default([]),
+  helperGuide: z.object({
+    overview: z.string(),
+    prerequisites: z.array(z.string()),
+    estimatedTime: z.string(),
+    resources: z.array(z.object({
+      title: z.string(),
+      type: z.enum(['video', 'article', 'cheatsheet', 'documentation', 'other']),
+      url: z.string(),
+      optional: z.boolean().default(false)
+    })).default([])
+  }).default({ overview: '', prerequisites: [], estimatedTime: 'Unknown', resources: [] })
+})
+
+export type EnhancedAssignment = z.infer<typeof enhancedAssignmentSchema>

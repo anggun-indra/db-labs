@@ -6,39 +6,52 @@
 //  - Roles are granted server-side: a client can only CREATE its own user
 //    document with role 'student', and can never change the role field
 //    afterwards (lecturer grants happen out-of-band in the console/API).
+rules_version = '2';
+
 service cloud.firestore {
+
   match /databases/{database}/documents {
 
     function signedIn() {
       return request.auth != null;
     }
 
-    // Roles are granted server-side (users/{uid}.role). This is the single
-    // authoritative lecturer check used by courses/assignments/submissions.
+    // Authoritative lecturer check used by courses/assignments/submissions.
     function isLecturer() {
       return signedIn()
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'lecturer';
+        && (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'lecturer'
+            || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin'
+            || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
     }
+
+    // Super Admin & Lecturer check for free-tier quota monitoring, user management and storage cleanup.
+    function isSuperAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin'
+            || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+            || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'lecturer');
+    }
+
 
     match /users/{uid} {
       // A user may read and update their own profile, but the role field
       // is frozen after creation (server-side role enforcement).
-      allow read: if signedIn() && request.auth.uid == uid;
+      // Super Admins have full management access (create, promote, update, delete).
+      allow read: if signedIn() && (request.auth.uid == uid || isSuperAdmin());
       allow create: if signedIn()
-        && request.auth.uid == uid
-        && request.resource.data.uid == uid
-        && request.resource.data.role == 'student';
+        && ((request.auth.uid == uid && request.resource.data.uid == uid && request.resource.data.role == 'student')
+            || isSuperAdmin());
       allow update: if signedIn()
-        && request.auth.uid == uid
-        && request.resource.data.uid == uid
-        && request.resource.data.role == resource.data.role;
-      allow delete: if false;
+        && ((request.auth.uid == uid && request.resource.data.uid == uid && request.resource.data.role == resource.data.role)
+            || isSuperAdmin());
+      allow delete: if isSuperAdmin();
     }
 
     match /projects/{projectId} {
       allow read, delete: if signedIn()
-        && resource.data.ownerUid == request.auth.uid;
+        && (resource.data.ownerUid == request.auth.uid || isSuperAdmin());
       allow create: if signedIn()
         && request.resource.data.ownerUid == request.auth.uid
         && request.resource.data.projectId == projectId;
@@ -52,42 +65,43 @@ service cloud.firestore {
     // Chunk access inherits ownership from the parent metadata document.
     match /sqliteSnapshots/{snapshotId} {
       allow read, delete: if signedIn()
-        && resource.data.ownerUid == request.auth.uid;
+        && (resource.data.ownerUid == request.auth.uid || isSuperAdmin());
       allow create: if signedIn()
         && request.resource.data.ownerUid == request.auth.uid
         && request.resource.data.snapshotId == snapshotId;
       allow update: if false;
 
       match /chunks/{chunkIndex} {
-        allow read, write: if signedIn()
-          && get(/databases/$(database)/documents/sqliteSnapshots/$(snapshotId))
-               .data.ownerUid == request.auth.uid;
+        allow read, write, delete: if signedIn()
+          && (get(/databases/$(database)/documents/sqliteSnapshots/$(snapshotId)).data.ownerUid == request.auth.uid || isSuperAdmin());
       }
     }
 
-    // Courses (Phase 6): readable by any signed-in user, managed by lecturers.
+    // Courses (Phase 6): readable by any signed-in user, managed by course owner (or super admin).
     match /courses/{courseId} {
       allow read: if signedIn();
-      allow create, update: if isLecturer()
+      allow create: if isLecturer()
         && request.resource.data.lecturerUid == request.auth.uid;
-      allow delete: if isLecturer();
+      allow update: if (isLecturer() && resource.data.lecturerUid == request.auth.uid && request.resource.data.lecturerUid == request.auth.uid)
+        || isSuperAdmin();
+      allow delete: if (isLecturer() && resource.data.lecturerUid == request.auth.uid) || isSuperAdmin();
     }
 
     // Course memberships (enrollments) (Phase 6+). Students join automatically,
     // lecturers manage roles manually. Readable by members only.
     match /courseMemberships/{membershipId} {
       allow read: if signedIn()
-        && request.auth.uid == resource.data.uid;
+        && (request.auth.uid == resource.data.uid || isSuperAdmin());
       
       allow create: if signedIn()
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.role == 'student';
       
       allow update: if signedIn()
-        && request.auth.uid == resource.data.uid;
+        && (request.auth.uid == resource.data.uid || isSuperAdmin());
       
       allow delete: if signedIn()
-        && request.auth.uid == resource.data.uid;
+        && (request.auth.uid == resource.data.uid || isSuperAdmin());
     }
 
     // Assignments (Phase 6+): students read published only; lecturers manage
@@ -99,8 +113,7 @@ service cloud.firestore {
       allow create: if isLecturer()
         && request.resource.data.createdByUid == request.auth.uid
         && request.resource.data.assignmentId == assignmentId;
-      allow update, delete: if isLecturer()
-        && resource.data.createdByUid == request.auth.uid;
+      allow update, delete: if (isLecturer() && resource.data.createdByUid == request.auth.uid) || isSuperAdmin();
     }
 
     // Task progress (Phase 6+): private per student-task relationship.
@@ -118,7 +131,7 @@ service cloud.firestore {
         && ((resource.data.uid == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'currentStep', 'completedAt']))
             || (isLecturer() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['score', 'feedback', 'graded'])));
       
-      allow delete: if false;
+      allow delete: if isSuperAdmin();
     }
 
     // Submissions (Phase 7): frozen snapshots. Students create/read their
@@ -135,8 +148,9 @@ service cloud.firestore {
       allow update: if isLecturer()
         && request.resource.data.diff(resource.data).affectedKeys()
             .hasOnly(['score', 'feedback', 'status', 'gradedAt', 'gradedByUid']);
-      allow delete: if false;
+      allow delete: if isSuperAdmin();
     }
+
 
     // Phase 8 hardening keeps the deny-by-default posture for anything new.
   }

@@ -1,8 +1,10 @@
-/* SQL Playground (Phase 3) layout. */
+/* SQL Playground (Phase 3 Revamp) Layout & Design */
 
 .playground-page {
-  max-width: 1400px;
+  max-width: 1440px;
   margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .playground-page__header {
@@ -11,43 +13,175 @@
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
-  padding: 10px 14px;
+  padding: 10px 16px;
   margin-bottom: 12px;
   background: var(--dsw-alias-bg-layer-1);
   border: 1px solid var(--dsw-alias-border-l2);
   border-radius: 12px;
 }
 
+@media (max-width: 768px) {
+  .playground-page__header {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+}
+
 .playground-page__grid {
   display: grid;
-  grid-template-columns: minmax(260px, 380px) 1fr;
+  grid-template-columns: minmax(240px, 300px) 1fr;
   gap: 12px;
   align-items: start;
 }
 
-@media (max-width: 900px) {
+.playground-page__schema {
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+  position: sticky;
+  top: 12px;
+}
+
+@media (max-width: 960px) {
   .playground-page__grid {
     grid-template-columns: 1fr;
   }
-}
 
-.playground-page__schema {
-  max-height: calc(100vh - 180px);
-  overflow: auto;
-}
-
-/* Stack list + detail vertically inside the narrow sidebar card. */
-.playground-page__schema .schema-explorer {
-  grid-template-columns: 1fr;
+  .playground-page__schema {
+    position: static;
+    max-height: 240px;
+    margin-bottom: 4px;
+  }
 }
 
 .playground-page__main {
   display: flex;
   flex-direction: column;
-  gap: 12px;
   min-width: 0;
 }
 
+.playground-console-workspace {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.playground-page__results {
+  min-height: 200px;
+  overflow: hidden;
+}
+
+/* Database Explorer Sidebar Styling */
+.database-explorer {
+  display: flex;
+  flex-direction: column;
+}
+
+.database-explorer__header {
+  border-bottom: 1px solid var(--dsw-alias-border-l2);
+  margin-bottom: 4px;
+}
+
+.database-explorer__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.database-explorer__table-node {
+  border-radius: 6px;
+  transition: background-color 0.15s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.database-explorer__table-node:hover {
+  background: var(--dsw-alias-bg-layer-2);
+}
+
+.database-explorer__table-node--selected {
+  background: var(--dsw-alias-bg-layer-2);
+  border-color: var(--dsw-alias-border-l1);
+}
+
+.database-explorer__table-header {
+  display: flex;
+  align-items: center;
+  padding: 6px 8px;
+  font-size: 13px;
+  user-select: none;
+}
+
+.database-explorer__expand-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  color: var(--dsw-alias-label-tertiary);
+  cursor: pointer;
+}
+
+.database-explorer__expand-icon:hover {
+  color: var(--dsw-alias-primary);
+}
+
+.database-explorer__table-name {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dsw-alias-label-primary);
+}
+
+.database-explorer__row-count {
+  font-size: 11px;
+  line-height: 16px;
+  padding: 0 4px;
+  border-radius: 4px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.database-explorer__actions {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.database-explorer__table-node:hover .database-explorer__actions {
+  opacity: 1;
+}
+
+.database-explorer__columns-list {
+  padding: 2px 8px 6px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border-left: 1px dashed var(--dsw-alias-border-l2);
+  margin-left: 14px;
+  margin-bottom: 4px;
+}
+
+.database-explorer__column-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.database-explorer__column-name {
+  color: var(--dsw-alias-label-secondary);
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+}
+
+.database-explorer__column-type {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 10px;
+}
+
+/* SQL Editor Styling */
 .sql-editor__toolbar {
   display: flex;
   align-items: center;
@@ -64,6 +198,12 @@
 
 .sql-editor__monaco {
   border: 1px solid var(--dsw-alias-border-l2);
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
+}
+
+/* Table Workspace Styling */
+.table-workspace {
+  display: flex;
+  flex-direction: column;
 }

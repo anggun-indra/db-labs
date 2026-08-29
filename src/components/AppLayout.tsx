@@ -2,15 +2,21 @@ import { useEffect, useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { Avatar, Layout, Menu, Space, Tag, Typography } from 'antd'
 import {
+
   ApartmentOutlined,
   AppstoreOutlined,
+  BookOutlined,
   CloudOutlined,
   ConsoleSqlOutlined,
+  DashboardOutlined,
   FormOutlined,
+  SafetyCertificateOutlined,
   SettingOutlined,
+  TeamOutlined,
   UserOutlined,
   WifiOutlined
 } from '@ant-design/icons'
+
 import { isFirebaseConfigured } from '@/lib/firebase/config'
 import { useAuthStore } from '@/stores/authStore'
 import { AppLogo } from '@/components/AppLogo'
@@ -22,10 +28,8 @@ const { Header, Sider, Content } = Layout
 /**
  * Application shell — DeepSeek-harness-style sidebar: 280px wide rail with a
  * brand row + collapse icon button, primary navigation in the middle, and
- * Settings pinned to the bottom (the dsh footArea pattern). The Database Lab
- * entry leads to project selection: the SQL Playground is always bound to
- * one project. Profile (Phase 4) hosts sign-in and account details; in local
- * mode it explains that everything stays on-device.
+ * Settings pinned to the bottom (the dsh footArea pattern).
+ * Super Admins get an administration-focused menu (Usage, List User, List Course).
  */
 export function AppLayout() {
   const location = useLocation()
@@ -39,20 +43,120 @@ export function AppLayout() {
     void initAuth()
   }, [initAuth])
 
-  const selectedKey = location.pathname.endsWith('/sql')
-    ? '/lab'
-    : location.pathname.startsWith('/projects')
-      ? '/projects'
-      : location.pathname.startsWith('/assignments')
-        ? '/assignments'
+  const isSuperAdmin = user?.role === 'super_admin' || user?.role === 'admin'
+  const searchParams = new URLSearchParams(location.search)
+  const activeTab = searchParams.get('tab')
+
+  const selectedKey = isSuperAdmin
+    ? location.pathname.startsWith('/admin')
+      ? activeTab === 'users'
+        ? '/admin/users'
+        : activeTab === 'courses'
+          ? '/admin/courses'
+          : '/admin'
+      : location.pathname.startsWith('/profile')
+        ? '/profile'
         : location.pathname.startsWith('/settings')
           ? '/settings'
-          : location.pathname.startsWith('/profile')
-            ? '/profile'
-            : '/'
+          : '/admin'
+    : location.pathname.endsWith('/sql')
+      ? '/lab'
+      : location.pathname.startsWith('/projects')
+        ? '/projects'
+        : location.pathname.startsWith('/assignments')
+          ? '/assignments'
+          : location.pathname.startsWith('/courses')
+            ? '/courses'
+            : location.pathname.startsWith('/admin')
+              ? '/admin'
+              : location.pathname.startsWith('/settings')
+                ? '/settings'
+                : location.pathname.startsWith('/profile')
+                  ? '/profile'
+                  : '/'
+
+  const adminNavItems = [
+    {
+      key: '/admin',
+      icon: <DashboardOutlined />,
+      label: <Link to="/admin">Usage & Quotas</Link>,
+      title: 'Free Tier Firebase usage, quotas & storage cleanup'
+    },
+    {
+      key: '/admin/users',
+      icon: <TeamOutlined />,
+      label: <Link to="/admin?tab=users">List User</Link>,
+      title: 'View and manage registered users'
+    },
+    {
+      key: '/admin/courses',
+      icon: <BookOutlined />,
+      label: <Link to="/admin?tab=courses">List Course</Link>,
+      title: 'View all academic courses & enrollment statistics'
+    },
+    {
+      key: '/profile',
+      icon: <UserOutlined />,
+      label: <Link to="/profile">Profile</Link>,
+      title: 'Admin profile and account details'
+    }
+  ]
+
+  const standardNavItems = [
+    {
+      key: '/',
+      icon: <AppstoreOutlined />,
+      label: <Link to="/">Dashboard</Link>
+    },
+    {
+      key: '/courses',
+      icon: <BookOutlined />,
+      label: <Link to="/courses">Courses</Link>,
+      title: 'View your enrolled courses'
+    },
+    {
+      key: '/projects',
+      icon: <ApartmentOutlined />,
+      label: <Link to="/projects">My Projects</Link>
+    },
+    {
+      key: '/lab',
+      icon: <ConsoleSqlOutlined />,
+      label: <Link to="/projects">Database Lab</Link>,
+      title: 'Open a project, then use its SQL Playground'
+    },
+    {
+      key: '/assignments',
+      icon: <FormOutlined />,
+      label: <Link to="/assignments">Assignments</Link>,
+      title:
+        mode === 'local'
+          ? 'Assignments arrive once Firebase is configured'
+          : undefined
+    },
+    {
+      key: '/profile',
+      icon: <UserOutlined />,
+      label: <Link to="/profile">Profile</Link>,
+      title:
+        mode === 'local'
+          ? 'Local mode — sign-in available once Firebase is configured'
+          : undefined
+    },
+    ...(user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'lecturer'
+      ? [
+          {
+            key: '/admin',
+            icon: <SafetyCertificateOutlined />,
+            label: <Link to="/admin">Admin Tools</Link>,
+            title: 'Firebase Quota & Space Manager'
+          }
+        ]
+      : [])
+  ]
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ height: '100vh', overflow: 'hidden' }}>
       <Sider
         collapsible
         collapsed={collapsed}
@@ -63,6 +167,13 @@ export function AppLayout() {
         width={280}
         collapsedWidth={56}
         trigger={null}
+        style={{
+          height: '100vh',
+          position: 'sticky',
+          top: 0,
+          left: 0,
+          zIndex: 100
+        }}
       >
         <div className={collapsed ? 'app-logo app-logo--collapsed' : 'app-logo'}>
           {collapsed ? (
@@ -81,7 +192,7 @@ export function AppLayout() {
             </button>
           ) : (
             <>
-              <Link to="/" className="app-logo__brand">
+              <Link to={isSuperAdmin ? "/admin" : "/"} className="app-logo__brand">
                 <AppLogo size={26} />
                 <span className="app-logo__text">DBLab</span>
               </Link>
@@ -99,44 +210,11 @@ export function AppLayout() {
         <Menu
           theme="light"
           mode="inline"
+          style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', borderRight: 0 }}
           selectedKeys={[selectedKey === '/settings' ? '' : selectedKey]}
-          items={[
-            {
-              key: '/',
-              icon: <AppstoreOutlined />,
-              label: <Link to="/">Dashboard</Link>
-            },
-            {
-              key: '/projects',
-              icon: <ApartmentOutlined />,
-              label: <Link to="/projects">My Projects</Link>
-            },
-            {
-              key: '/lab',
-              icon: <ConsoleSqlOutlined />,
-              label: <Link to="/projects">Database Lab</Link>,
-              title: 'Open a project, then use its SQL Playground'
-            },
-            {
-              key: '/assignments',
-              icon: <FormOutlined />,
-              label: <Link to="/assignments">Assignments</Link>,
-              title:
-                mode === 'local'
-                  ? 'Assignments arrive once Firebase is configured'
-                  : undefined
-            },
-            {
-              key: '/profile',
-              icon: <UserOutlined />,
-              label: <Link to="/profile">Profile</Link>,
-              title:
-                mode === 'local'
-                  ? 'Local mode — sign-in available once Firebase is configured'
-                  : undefined
-            }
-          ]}
+          items={isSuperAdmin ? adminNavItems : standardNavItems}
         />
+
         <div className="app-sider__foot">
           <Link
             to="/settings"
@@ -152,8 +230,8 @@ export function AppLayout() {
           </Link>
         </div>
       </Sider>
-      <Layout>
-        <Header className="app-header">
+      <Layout style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <Header className="app-header" style={{ position: 'sticky', top: 0, zIndex: 90, flex: 'none' }}>
           <span className="app-header__title-wrap">
             <Typography.Text className="app-header__title">
               Database Management Labs
@@ -176,23 +254,24 @@ export function AppLayout() {
                 <Link to="/profile" className="app-header__link">
                   <Space size={6}>
                     <Avatar size="small" src={user.photoURL ?? undefined} icon={<UserOutlined />} />
-                    <span>{user.displayName || user.email || 'Account'}</span>
+                    <span className="app-header__user-label">{user.displayName || user.email || 'Account'}</span>
                   </Space>
                 </Link>
               ) : (
                 <Link to="/profile" className="app-header__link">
                   <Space size={6}>
                     <CloudOutlined />
-                    <span>Sign in</span>
+                    <span className="app-header__user-label">Sign in</span>
                   </Space>
                 </Link>
               ))}
           </Space>
         </Header>
-        <Content className="app-content">
+        <Content className="app-content" style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
           <Outlet />
         </Content>
       </Layout>
     </Layout>
   )
 }
+

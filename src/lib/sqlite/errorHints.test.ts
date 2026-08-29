@@ -14,6 +14,12 @@ describe('explainSqliteError', () => {
     expect(explanation?.hint).toContain('customer_name')
   })
 
+  it('explains table has no column named', () => {
+    const explanation = explainSqliteError('table users has no column named age')
+    expect(explanation?.code).toBe('NO_SUCH_COLUMN_IN_TABLE')
+    expect(explanation?.hint).toContain('age')
+  })
+
   it('explains syntax errors', () => {
     const explanation = explainSqliteError('near "SELEC": syntax error')
     expect(explanation?.code).toBe('SYNTAX_ERROR')
@@ -28,6 +34,20 @@ describe('explainSqliteError', () => {
     )
     expect(explainSqliteError('FOREIGN KEY constraint failed')?.code).toBe('FOREIGN_KEY_CONSTRAINT')
     expect(explainSqliteError('PRIMARY KEY constraint failed')?.code).toBe('PRIMARY_KEY_CONSTRAINT')
+    expect(explainSqliteError('CHECK constraint failed: price > 0')?.code).toBe('CHECK_CONSTRAINT')
+  })
+
+  it('explains wrong column count on insert', () => {
+    expect(explainSqliteError('2 values for 3 columns')?.code).toBe('WRONG_COLUMN_COUNT')
+    expect(explainSqliteError('table users has 3 columns but 2 values were supplied')?.code).toBe(
+      'WRONG_COLUMN_COUNT'
+    )
+  })
+
+  it('explains datatype mismatch and unrecognized tokens', () => {
+    expect(explainSqliteError('datatype mismatch')?.code).toBe('DATATYPE_MISMATCH')
+    expect(explainSqliteError('unrecognized token: "@"')?.code).toBe('UNRECOGNIZED_TOKEN')
+    expect(explainSqliteError('incomplete input')?.code).toBe('INCOMPLETE_INPUT')
   })
 
   it('explains ambiguous columns', () => {

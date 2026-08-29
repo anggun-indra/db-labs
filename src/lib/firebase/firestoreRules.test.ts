@@ -143,9 +143,51 @@ describe.skipIf(!canRun)('Firestore security rules (emulator)', () => {
     )
   })
 
-  it('denies reading another user\'s profile', async () => {
+  it('denies reading another user\'s profile for non-admins', async () => {
     const bob = testEnv().authenticatedContext('uid-b')
     await assertFails(getDoc(doc(bob.firestore(), 'users/uid-a')))
+  })
+
+  it('allows super admin to create, read, promote, and delete user profiles', async () => {
+    await testEnv().withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), 'users/super-1'), {
+        uid: 'super-1',
+        displayName: 'Super Admin',
+        email: 'admin@dblab.org',
+        role: 'super_admin',
+        createdAt: '2024-01-01T00:00:00.000Z'
+      })
+    })
+
+    const admin = testEnv().authenticatedContext('super-1')
+
+    // Super Admin creates a new lecturer user doc
+    await assertSucceeds(
+      setDoc(doc(admin.firestore(), 'users/lec-new'), {
+        uid: 'lec-new',
+        displayName: 'New Lecturer',
+        email: 'lec@dblab.org',
+        role: 'lecturer',
+        createdAt: '2024-01-01T00:00:00.000Z'
+      })
+    )
+
+    // Super Admin can read any user profile
+    await assertSucceeds(getDoc(doc(admin.firestore(), 'users/lec-new')))
+
+    // Super Admin promotes a student to lecturer
+    await assertSucceeds(
+      setDoc(doc(admin.firestore(), 'users/uid-a'), {
+        uid: 'uid-a',
+        displayName: 'Alice',
+        email: 'alice@student.ac.id',
+        role: 'lecturer',
+        createdAt: '2024-01-01T00:00:00.000Z'
+      })
+    )
+
+    // Super Admin deletes a user profile
+    await assertSucceeds(deleteDoc(doc(admin.firestore(), 'users/lec-new')))
   })
 
   const snapshotMeta = (ownerUid: string, snapshotId: string) => ({

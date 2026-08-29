@@ -19,10 +19,14 @@ test-results/
 blob-report/
 playwright/.cache/
 
+# Firebase
+.firebase/
+
 # Environment files (never commit real Firebase config)
 .env
 .env.local
 .env.*.local
+.env.production
 
 # Editor
 .vscode/*

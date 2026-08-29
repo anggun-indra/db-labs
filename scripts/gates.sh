@@ -10,6 +10,27 @@ cd "$(dirname "$0")/.."
 QUICK=0
 [[ "${1:-}" == "--quick" ]] && QUICK=1
 
+# Temporarily stash all .env files so production build & e2e test pristine local-first fallback
+ENV_FILES=(.env .env.local .env.production)
+STASHED=()
+for f in "${ENV_FILES[@]}"; do
+  if [[ -f "$f" ]]; then
+    mv "$f" "$f.bak"
+    STASHED+=("$f")
+  fi
+done
+
+cleanup() {
+  for f in "${STASHED[@]}"; do
+    if [[ -f "$f.bak" ]]; then
+      mv "$f.bak" "$f"
+    fi
+  done
+}
+trap cleanup EXIT
+
+
+
 gate() {
   local label="$1"; shift
   echo "=== GATE: $label"

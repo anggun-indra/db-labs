@@ -3,6 +3,8 @@
 .database-page {
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .database-page__header {
@@ -16,6 +18,13 @@
   background: var(--dsw-alias-bg-layer-1);
   border: 1px solid var(--dsw-alias-border-l2);
   border-radius: 12px;
+}
+
+@media (max-width: 768px) {
+  .database-page__header {
+    padding: 8px 12px;
+    gap: 8px;
+  }
 }
 
 .database-page__body {
@@ -48,7 +57,8 @@
   font-size: 12px;
   line-height: 1.5;
   background: var(--dsw-alias-bg-base);
-  white-space: pre;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 /* Schema explorer ---------------------------------------------------------- */

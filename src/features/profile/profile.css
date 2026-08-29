@@ -1,10 +1,17 @@
 .profile-page {
   display: flex;
   justify-content: center;
-  padding-top: 24px;
+  padding-top: 16px;
+  width: 100%;
 }
 
 .profile-card {
   width: 100%;
   max-width: 560px;
+}
+
+@media (max-width: 768px) {
+  .profile-page {
+    padding-top: 8px;
+  }
 }

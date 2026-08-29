@@ -29,42 +29,68 @@ interface AuthState {
 
 const profileCacheKey = (uid: string) => `dblab:profile:${uid}`
 
-async function ensureProfile(firebaseUser: FirebaseUserLike): Promise<UserRole> {
-  const cached = localStorage.getItem(profileCacheKey(firebaseUser.uid))
-  if (cached) {
-    try {
-      const parsed: unknown = JSON.parse(cached)
-      const role = (parsed as { role?: unknown })?.role
-      if (role === 'student' || role === 'lecturer') return role
-    } catch {
-      // fall through to remote load
+export function clearProfileCache(uid?: string): void {
+  if (typeof localStorage === 'undefined') return
+  if (uid) {
+    localStorage.removeItem(profileCacheKey(uid))
+  }
+  const keysToRemove: string[] = []
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    if (key && key.startsWith('dblab:profile:')) {
+      keysToRemove.push(key)
     }
   }
-
-  const adapters = getCloudAdapters()
-  if (!adapters) return 'student'
-
-  try {
-    const remote = await adapters.users.loadProfile(firebaseUser.uid)
-    if (remote) {
-      localStorage.setItem(profileCacheKey(firebaseUser.uid), JSON.stringify(remote))
-      return remote.role
-    }
-    // Roles are granted server-side only; self sign-up is always 'student'.
-    const profile = {
-      uid: firebaseUser.uid,
-      displayName: firebaseUser.displayName ?? '',
-      email: firebaseUser.email ?? '',
-      role: 'student' as const,
-      createdAt: new Date().toISOString()
-    }
-    await adapters.users.createProfile(profile)
-    localStorage.setItem(profileCacheKey(firebaseUser.uid), JSON.stringify(profile))
-    return 'student'
-  } catch {
-    return 'student'
-  }
+  keysToRemove.forEach((key) => localStorage.removeItem(key))
 }
+
+async function ensureProfile(firebaseUser: FirebaseUserLike): Promise<UserRole> {
+  const adapters = getCloudAdapters()
+  if (adapters) {
+    try {
+      const remote = await adapters.users.loadProfile(firebaseUser.uid)
+      if (remote) {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem(profileCacheKey(firebaseUser.uid), JSON.stringify(remote))
+        }
+        return remote.role
+      }
+      // Roles are granted server-side only; self sign-up is always 'student'.
+      const profile = {
+        uid: firebaseUser.uid,
+        displayName: firebaseUser.displayName ?? '',
+        email: firebaseUser.email ?? '',
+        role: 'student' as const,
+        createdAt: new Date().toISOString()
+      }
+      await adapters.users.createProfile(profile)
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(profileCacheKey(firebaseUser.uid), JSON.stringify(profile))
+      }
+      return 'student'
+    } catch {
+      // Remote load failed (e.g. offline), fall back to cache
+    }
+  }
+
+  // Fallback to cache if offline or adapters not configured
+  if (typeof localStorage !== 'undefined') {
+    const cached = localStorage.getItem(profileCacheKey(firebaseUser.uid))
+    if (cached) {
+      try {
+        const parsed: unknown = JSON.parse(cached)
+        const role = (parsed as { role?: unknown })?.role
+        if (role === 'student' || role === 'lecturer' || role === 'super_admin' || role === 'admin') return role
+      } catch {
+        // fall through
+      }
+    }
+
+  }
+
+  return 'student'
+}
+
 
 export const useAuthStore = create<AuthState>()((set) => {
   let adapter: AuthAdapter | null = null
@@ -153,12 +179,15 @@ export const useAuthStore = create<AuthState>()((set) => {
     async signOutUser() {
       if (!adapter) return
       try {
+        const currentUid = useAuthStore.getState().user?.uid
         await adapter.signOutUser()
+        clearProfileCache(currentUid)
         set({ user: null, authError: null })
       } catch (error) {
         set({ authError: error instanceof Error ? error.message : 'Sign-out failed.' })
       }
     }
+
   }
 })
 

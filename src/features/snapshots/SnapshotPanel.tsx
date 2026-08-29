@@ -171,7 +171,7 @@ export function SnapshotPanel({ projectId, erd }: { projectId: string; erd: ErdP
                 {
                   key: 'checksum',
                   label: 'SHA-256',
-                  children: <Typography.Text code copyable>{latest.checksum}</Typography.Text>
+                  children: <Typography.Text code copyable style={{ wordBreak: 'break-all', fontSize: 11 }}>{latest.checksum}</Typography.Text>
                 }
               ]}
             />

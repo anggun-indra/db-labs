@@ -47,12 +47,14 @@ describe('userProfileSchema', () => {
     expect(parsed.role).toBe('student')
   })
 
-  it('accepts lecturer role granted server-side', () => {
-    const parsed = userProfileSchema.parse({ uid: 'uid-1', role: 'lecturer' })
-    expect(parsed.role).toBe('lecturer')
+  it('accepts lecturer, super_admin, and admin roles granted server-side', () => {
+    expect(userProfileSchema.parse({ uid: 'uid-1', role: 'lecturer' }).role).toBe('lecturer')
+    expect(userProfileSchema.parse({ uid: 'uid-2', role: 'super_admin' }).role).toBe('super_admin')
+    expect(userProfileSchema.parse({ uid: 'uid-3', role: 'admin' }).role).toBe('admin')
   })
 
   it('rejects unknown roles', () => {
-    expect(userProfileSchema.safeParse({ uid: 'uid-1', role: 'admin' }).success).toBe(false)
+    expect(userProfileSchema.safeParse({ uid: 'uid-1', role: 'guest_or_invalid' }).success).toBe(false)
   })
 })
+

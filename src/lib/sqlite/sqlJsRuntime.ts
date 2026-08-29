@@ -146,7 +146,11 @@ export class SqlJsDatabaseService implements SqliteDatabaseService {
       return {
         kind: 'error',
         executionTimeMs: 0,
-        error: { raw: 'No database is open. Create or open a database first.' }
+        error: {
+          raw: 'No database is open. Create or open a database first.',
+          code: 'NO_DATABASE_OPEN',
+          hint: 'Generate a SQLite database from your ERD on the Database page first, then practice SQL here.'
+        }
       }
     }
 
@@ -182,7 +186,13 @@ export class SqlJsDatabaseService implements SqliteDatabaseService {
       return {
         kind: 'error',
         executionTimeMs: performance.now() - start,
-        error: { raw, code: explanation?.code, hint: explanation?.hint }
+        error: {
+          raw,
+          code: explanation?.code ?? 'SQLITE_ERROR',
+          hint:
+            explanation?.hint ??
+            'Check your SQL syntax, table structure in the Schema panel, and column data types.'
+        }
       }
     }
   }

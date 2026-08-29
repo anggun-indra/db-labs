@@ -100,6 +100,7 @@ export function SchemaExplorer({
                     <Table
                       size="small"
                       pagination={false}
+                      scroll={{ x: 'max-content' }}
                       rowKey="name"
                       dataSource={table.columns}
                       columns={[

@@ -34,7 +34,8 @@ export function TableInspector() {
         </Space>
       }
       placement="right"
-      width={420}
+      width="min(420px, 100vw)"
+      style={{ maxWidth: '100vw' }}
       open={open}
       onClose={() => selectTable(null)}
       mask={false}

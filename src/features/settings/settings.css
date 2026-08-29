@@ -159,13 +159,28 @@
 @media (max-width: 720px) {
   .dsw-settings {
     flex-direction: column;
+    gap: 12px;
   }
   .dsw-settings__rail {
     width: 100%;
     position: static;
     flex-direction: row;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 0 4px 0;
   }
   .dsw-settings__rail-title {
     display: none;
+  }
+  .dsw-settings__panel {
+    border-radius: 16px;
+    width: 100%;
+  }
+  .dsw-settings__content {
+    padding: 16px;
+  }
+  .dsw-theme-cube {
+    flex: 1 1 120px;
+    padding: 14px 16px;
   }
 }

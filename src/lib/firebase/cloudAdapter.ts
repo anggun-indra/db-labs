@@ -71,15 +71,17 @@ export function createFirebaseAuthAdapter(): AuthAdapter | null {
 /* Firestore data contracts (see FIRESTORE-DATA-MODEL.md)                    */
 /* ------------------------------------------------------------------------ */
 
+export const userRoleSchema = z.enum(['student', 'lecturer', 'super_admin', 'admin'])
+
 export const userProfileSchema = z.object({
   uid: z.string().min(1),
   displayName: z.string().default(''),
   email: z.string().default(''),
-  role: z.enum(['student', 'lecturer']).default('student'),
+  role: userRoleSchema.default('student'),
   createdAt: z.string().default('')
 })
 
-export type UserRole = 'student' | 'lecturer'
+export type UserRole = z.infer<typeof userRoleSchema>
 
 export interface UserProfile {
   uid: string
@@ -88,6 +90,7 @@ export interface UserProfile {
   role: UserRole
   createdAt: string
 }
+
 
 export const remoteProjectSchema = z.object({
   projectId: z.string().min(1),

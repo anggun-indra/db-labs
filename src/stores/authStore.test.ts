@@ -131,7 +131,8 @@ describe('sign-in flows', () => {
     expect(useAuthStore.getState().authError).toBe('auth/invalid-credential')
   })
 
-  it('signs out cleanly', async () => {
+  it('signs out cleanly and clears profile cache', async () => {
+    window.localStorage.setItem('dblab:profile:uid-new', JSON.stringify({ role: 'student' }))
     const adapter = new FakeAuthAdapter()
     await useAuthStore.getState().initAuth(adapter)
     await useAuthStore.getState().signUpWithEmail('Budi', 'budi@student.ac.id', 'password123')
@@ -141,5 +142,7 @@ describe('sign-in flows', () => {
     await useAuthStore.getState().signOutUser()
     expect(adapter.signedOut).toBe(true)
     expect(useAuthStore.getState().user).toBeNull()
+    expect(window.localStorage.getItem('dblab:profile:uid-new')).toBeNull()
   })
 })
+

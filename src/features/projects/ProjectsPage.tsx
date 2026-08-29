@@ -180,6 +180,7 @@ export function ProjectsPage() {
         title="New ERD project"
         open={createOpen}
         okText="Create"
+        width="min(480px, 95vw)"
         confirmLoading={creating}
         onCancel={() => setCreateOpen(false)}
         onOk={() => void handleCreate()}
@@ -200,6 +201,7 @@ export function ProjectsPage() {
         title="Rename project"
         open={Boolean(renameTarget)}
         okText="Save"
+        width="min(480px, 95vw)"
         onCancel={() => setRenameTarget(null)}
         onOk={() => void handleRename()}
       >

@@ -1,7 +1,7 @@
 {
   "name": "database-learning-lab",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.4",
   "type": "module",
   "description": "Database Learning Lab - a local-first React PWA for learning database management through hands-on ERD design and SQL practice.",
   "scripts": {
@@ -20,9 +20,11 @@
     "emulators": "bash scripts/emulators.sh",
     "seed:demo": "node scripts/seed-demo.mjs",
     "gates": "bash scripts/gates.sh",
-    "dev:emulators": "vite --mode emulator",
+    "dev:emulators": "concurrently \"npm run dev\" \"npm run serve:emulators\"",
     "visual": "node scripts/visual-snapshots.mjs",
-    "deploy": "npm version patch --no-git-tag-version && npm run build"
+    "deploy": "firebase deploy",
+    "start": "vite preview",
+    "serve:emulators": "firebase emulators:start --project demo-dblab"
   },
   "dependencies": {
     "@ant-design/icons": "^5.5.1",
@@ -50,6 +52,7 @@
     "@types/react-dom": "^18.3.1",
     "@types/sql.js": "^1.4.11",
     "@vitejs/plugin-react": "^4.3.3",
+    "concurrently": "^10.0.5",
     "eslint": "^9.14.0",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",

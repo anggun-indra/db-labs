@@ -29,8 +29,8 @@ interface PlaygroundState {
   loadFor(projectId: string): void
   setSql(sql: string): void
   clearEditor(): void
-  run(text: string): Promise<void>
-  recordMutation(sql: string): Promise<void>
+  run(text: string): Promise<QueryExecutionResult>
+  recordMutation(sql: string): Promise<QueryExecutionResult>
   clearHistoryEntries(): void
 }
 
@@ -74,9 +74,20 @@ export const usePlaygroundStore = create<PlaygroundState>()((set, get) => ({
     get().setSql('')
   },
 
-  async run(text) {
+  async run(text): Promise<QueryExecutionResult> {
     const { projectId } = get()
-    if (!projectId || text.trim().length === 0) return
+    if (!projectId || text.trim().length === 0) {
+      const emptyResult: QueryExecutionResult = {
+        kind: 'error',
+        executionTimeMs: 0,
+        error: {
+          raw: 'No SQL statement to run.',
+          code: 'EMPTY_STATEMENT',
+          hint: 'Write a SQL query in the editor or select a table in the data editor.'
+        }
+      }
+      return emptyResult
+    }
     set({ running: true })
     const result = await sqliteService.execute(text)
     // Explicit runs should survive immediate navigation/reload: force the
@@ -94,11 +105,12 @@ export const usePlaygroundStore = create<PlaygroundState>()((set, get) => ({
     if (result.kind !== 'error') {
       await useProjectDbStore.getState().refreshSchema(null)
     }
+    return result
   },
 
-  async recordMutation(sql) {
+  async recordMutation(sql): Promise<QueryExecutionResult> {
     set({ lastMutationSql: sql })
-    await get().run(sql)
+    return await get().run(sql)
   },
 
   clearHistoryEntries() {

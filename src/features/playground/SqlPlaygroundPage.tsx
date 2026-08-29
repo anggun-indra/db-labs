@@ -1,31 +1,69 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Alert, Button, Card, Result, Space, Spin, Tabs, Tag, Typography } from 'antd'
-import { ApartmentOutlined, ArrowLeftOutlined, CodeOutlined } from '@ant-design/icons'
+import {
+  ApartmentOutlined,
+  ArrowLeftOutlined,
+  CodeOutlined,
+  ConsoleSqlOutlined,
+  HistoryOutlined,
+  InfoCircleOutlined,
+  TableOutlined
+} from '@ant-design/icons'
 import { projectRepository } from '@/lib/persistence/localProjectRepository'
 import { useProjectDbStore } from '@/stores/projectDbStore'
 import { usePlaygroundStore } from './playgroundStore'
 import { SqlEditor } from './components/SqlEditor'
 import { ResultViewer } from './components/ResultViewer'
 import { HistoryPanel } from './components/HistoryPanel'
-import { VisualDataEditor } from './components/VisualDataEditor'
-import { SchemaExplorer } from '@/features/database/components/SchemaExplorer'
+import { TableWorkspace } from './components/TableWorkspace'
+import { DatabaseExplorer } from './components/DatabaseExplorer'
+import { quoteIdentifier } from '@/lib/sqlite/identifier'
 import type { ErdProject } from '@/features/erd/domain/schema'
 import './playground.css'
 
 /**
- * SQL Playground (Phase 3): practice SQL against the project's local SQLite
- * database. Everything executes in the browser (spec §3).
+ * SQL Playground (Phase 3 Revamp): Modern Database Management Tool architecture.
+ * Features dedicated SQL Console, Table Data & Schema workspace tabs,
+ * and an interactive Database Object Explorer (spec §3, §16, §47).
  */
 export function SqlPlaygroundPage() {
   const { projectId } = useParams<{ projectId: string }>()
   const [projectName, setProjectName] = useState<string | null>(null)
   const [notFound, setNotFound] = useState(false)
   const [selectedTable, setSelectedTable] = useState<string | null>(null)
+  const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<string>('console')
+  const [consoleOutputTab, setConsoleOutputTab] = useState<string>('results')
 
   const { status, storageKind, schema, openFor } = useProjectDbStore()
-  const { sql, result, running, history, lastMutationSql, loadFor, setSql, clearEditor, run, clearHistoryEntries } =
-    usePlaygroundStore()
+  const {
+    sql,
+    result,
+    running,
+    history,
+    lastMutationSql,
+    loadFor,
+    setSql,
+    clearEditor,
+    run,
+    clearHistoryEntries
+  } = usePlaygroundStore()
+
+  const handleRun = (text: string) => {
+    setActiveWorkspaceTab('console')
+    setConsoleOutputTab('results')
+    void run(text)
+  }
+
+  const handleGenerateQuery = (tableName: string) => {
+    setSql(`SELECT * FROM ${quoteIdentifier(tableName)} LIMIT 50;`)
+    setActiveWorkspaceTab('console')
+  }
+
+  const handleOpenTableData = (tableName: string) => {
+    setSelectedTable(tableName)
+    setActiveWorkspaceTab('table-view')
+  }
 
   useEffect(() => {
     if (!projectId) return
@@ -39,6 +77,12 @@ export function SqlPlaygroundPage() {
     void openFor(projectId)
     loadFor(projectId)
   }, [projectId, openFor, loadFor])
+
+  useEffect(() => {
+    if (!selectedTable && schema.length > 0) {
+      setSelectedTable(schema[0].name)
+    }
+  }, [schema, selectedTable])
 
   if (notFound || !projectId) {
     return (
@@ -70,7 +114,7 @@ export function SqlPlaygroundPage() {
   return (
     <div className="playground-page">
       <div className="playground-page__header">
-        <Space>
+        <Space wrap align="center">
           <Link to="/projects">
             <Button type="text" icon={<ArrowLeftOutlined />} aria-label="Back to projects" />
           </Link>
@@ -79,7 +123,7 @@ export function SqlPlaygroundPage() {
           </Typography.Title>
           {statusTag}
         </Space>
-        <Space>
+        <Space wrap>
           <Link to={`/projects/${projectId}/erd`}>
             <Button icon={<ApartmentOutlined />}>Edit ERD</Button>
           </Link>
@@ -107,69 +151,161 @@ export function SqlPlaygroundPage() {
         </Card>
       ) : (
         <div className="playground-page__grid">
-          <Card className="playground-page__schema" size="small" title="Schema">
-            <SchemaExplorer
+          <Card className="playground-page__schema" size="small" title="Database Explorer">
+            <DatabaseExplorer
               schema={schema}
               selectedTable={selectedTable}
               onSelectTable={setSelectedTable}
+              onOpenTableData={handleOpenTableData}
+              onGenerateQuery={handleGenerateQuery}
             />
           </Card>
 
           <div className="playground-page__main">
-            <Card size="small">
-              <SqlEditor
-                value={sql}
-                onChange={setSql}
-                onRun={(text) => void run(text)}
-                onClear={clearEditor}
-                running={running}
-              />
-            </Card>
+            <Tabs
+              type="card"
+              size="middle"
+              activeKey={activeWorkspaceTab}
+              onChange={setActiveWorkspaceTab}
+              items={[
+                {
+                  key: 'console',
+                  label: (
+                    <span>
+                      <ConsoleSqlOutlined style={{ marginRight: 6 }} />
+                      SQL Console
+                    </span>
+                  ),
+                  children: (
+                    <div className="playground-console-workspace">
+                      <Card size="small" style={{ marginBottom: 12 }}>
+                        <SqlEditor
+                          value={sql}
+                          onChange={setSql}
+                          onRun={handleRun}
+                          onClear={clearEditor}
+                          running={running}
+                        />
+                      </Card>
 
-            <Card size="small" className="playground-page__results">
-              {lastMutationSql && (
-                <Alert
-                  type="info"
-                  showIcon
-                  style={{ marginBottom: 8 }}
-                  message="Last generated mutation SQL"
-                  description={
-                    <pre className="ddl-preview__code" style={{ margin: 0 }}>
-                      {lastMutationSql}
-                    </pre>
-                  }
-                />
-              )}
-              <Tabs
-                size="small"
-                items={[
-                  {
-                    key: 'results',
-                    label: 'Results',
-                    children: <ResultViewer result={result} />
-                  },
-                  {
-                    key: 'data',
-                    label: 'Data editor',
-                    children: <VisualDataEditor schema={schema} />
-                  },
-                  {
-                    key: 'history',
-                    label: `History (${history.length})`,
-                    children: (
+                      <Card size="small" className="playground-page__results">
+                        <Tabs
+                          size="small"
+                          activeKey={consoleOutputTab}
+                          onChange={setConsoleOutputTab}
+                          items={[
+                            {
+                              key: 'results',
+                              label: (
+                                <span>
+                                  <TableOutlined style={{ marginRight: 4 }} />
+                                  Results
+                                </span>
+                              ),
+                              children: <ResultViewer result={result} />
+                            },
+                            {
+                              key: 'messages',
+                              label: (
+                                <span>
+                                  <InfoCircleOutlined style={{ marginRight: 4 }} />
+                                  Messages & Last SQL
+                                </span>
+                              ),
+                              children: (
+                                <Space
+                                  direction="vertical"
+                                  style={{ width: '100%' }}
+                                  size="middle"
+                                >
+                                  {lastMutationSql ? (
+                                    <Alert
+                                      type="info"
+                                      showIcon
+                                      message="Last Generated Mutation SQL (Visual Editor)"
+                                      description={
+                                        <pre className="ddl-preview__code" style={{ margin: 0 }}>
+                                          {lastMutationSql}
+                                        </pre>
+                                      }
+                                    />
+                                  ) : (
+                                    <Typography.Text type="secondary">
+                                      No visual mutations executed yet in this session.
+                                    </Typography.Text>
+                                  )}
+                                </Space>
+                              )
+                            },
+                            {
+                              key: 'history',
+                              label: (
+                                <span>
+                                  <HistoryOutlined style={{ marginRight: 4 }} />
+                                  Recent History ({history.length})
+                                </span>
+                              ),
+                              children: (
+                                <HistoryPanel
+                                  history={history}
+                                  onRerun={(entrySql) => {
+                                    setSql(entrySql)
+                                    handleRun(entrySql)
+                                  }}
+                                  onClear={clearHistoryEntries}
+                                />
+                              )
+                            }
+                          ]}
+                        />
+                      </Card>
+                    </div>
+                  )
+                },
+                {
+                  key: 'table-view',
+                  label: (
+                    <span>
+                      <TableOutlined style={{ marginRight: 6 }} />
+                      Table Data & Schema
+                      {selectedTable && (
+                        <Tag color="blue" style={{ marginLeft: 6, fontSize: 11, padding: '0 4px' }}>
+                          {selectedTable}
+                        </Tag>
+                      )}
+                    </span>
+                  ),
+                  children: (
+                    <TableWorkspace
+                      schema={schema}
+                      selectedTable={selectedTable}
+                      onSelectTable={setSelectedTable}
+                    />
+                  )
+                },
+                {
+                  key: 'history',
+                  label: (
+                    <span>
+                      <HistoryOutlined style={{ marginRight: 6 }} />
+                      Full History ({history.length})
+                    </span>
+                  ),
+                  children: (
+                    <Card size="small">
                       <HistoryPanel
                         history={history}
                         onRerun={(entrySql) => {
                           setSql(entrySql)
-                          void run(entrySql)
+                          handleRun(entrySql)
                         }}
                         onClear={clearHistoryEntries}
                       />
-                    )
-                  }
-                ]}
-              />
-            </Card>
+                    </Card>
+                  )
+                }
+              ]}
+            />
           </div>
         </div>
       )}

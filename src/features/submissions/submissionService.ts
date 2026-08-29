@@ -26,14 +26,17 @@ export interface SnapshotSaver {
   restore(snapshotId: string): Promise<Uint8Array>
 }
 
+import type { UserRole } from '@/lib/firebase/cloudAdapter'
+
 export interface SubmissionServiceDeps {
   adapter: SubmissionAdapter
   snapshotService: SnapshotSaver
   getUid: () => string | null
-  getRole: () => 'student' | 'lecturer' | null
+  getRole: () => UserRole | null
   exportProjectBytes: (projectId: string) => Promise<Uint8Array | null>
   now?: () => Date
 }
+
 
 export interface SubmitInput {
   assignmentId: string
@@ -128,9 +131,11 @@ export class SubmissionService {
 
   async grade(submissionId: string, score: number, feedback: string): Promise<Submission> {
     const uid = this.requireSignedIn()
-    if (this.deps.getRole() !== 'lecturer') {
+    const role = this.deps.getRole()
+    if (role !== 'lecturer' && role !== 'super_admin' && role !== 'admin') {
       throw new Error('Only lecturers can grade submissions.')
     }
+
     if (!Number.isFinite(score) || score < 0 || score > 100) {
       throw new Error('Score must be between 0 and 100.')
     }

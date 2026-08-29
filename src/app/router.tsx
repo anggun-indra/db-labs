@@ -9,6 +9,11 @@ import { DatabasePage } from '@/features/database/DatabasePage'
 import { ProfilePage } from '@/features/profile/ProfilePage'
 import { AssignmentsPage } from '@/features/assignments/AssignmentsPage'
 import { SettingsPage } from '@/features/settings/SettingsPage'
+import { CourseListPage } from '@/features/courses/CourseListPage'
+import { CourseDetailPage } from '@/features/courses/CourseDetailPage'
+import { AssignmentTaskPage } from '@/features/assignments/AssignmentTaskPage'
+
+import { SuperAdminPage } from '@/features/admin/SuperAdminPage'
 
 /**
  * The SQL Playground is lazy: it pulls Monaco and the playground feature
@@ -26,10 +31,15 @@ export const router = createBrowserRouter([
     element: <AppLayout />,
     children: [
       { index: true, element: <DashboardPage /> },
+      { path: 'courses', element: <CourseListPage /> },
+      { path: 'courses/:courseId', element: <CourseDetailPage /> },
+      { path: 'courses/:courseId/assignments/:assignmentId', element: <AssignmentTaskPage /> },
       { path: 'projects', element: <ProjectsPage /> },
       { path: 'assignments', element: <AssignmentsPage /> },
+      { path: 'admin', element: <SuperAdminPage /> },
       { path: 'profile', element: <ProfilePage /> },
       { path: 'settings', element: <SettingsPage /> },
+
       { path: 'projects/:projectId/erd', element: <ErdEditorPage /> },
       { path: 'projects/:projectId/database', element: <DatabasePage /> },
       {

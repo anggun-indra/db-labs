@@ -2,14 +2,15 @@ import { Result } from 'antd'
 import { CloudOutlined } from '@ant-design/icons'
 import { useAuthStore } from '@/stores/authStore'
 import { isFirebaseConfigured } from '@/lib/firebase/config'
+import { isLecturerOrAdmin } from '@/lib/firebase/roles'
 import { StudentAssignments } from './StudentAssignments'
 import { LecturerAssignments } from './LecturerAssignments'
 import './assignments.css'
 
 /**
- * Assignments entry (Phase 6). Requires Firebase + sign-in: in local mode
- * the page explains itself. Lecturers get the management view; students
- * see published assignments only (rules enforce both).
+ * Assignments entry (Phase 6 / Phase 8 Generic Roles).
+ * Instruktur / Lecturers and Admins get the management view;
+ * Peserta / Students see published assignments only (rules enforce both).
  */
 export function AssignmentsPage() {
   const user = useAuthStore((s) => s.user)
@@ -21,11 +22,11 @@ export function AssignmentsPage() {
         <Result
           icon={<CloudOutlined />}
           title="Assignments need cloud sync"
-          subTitle="Assignments are created by lecturers and shared through Firestore. Sign in with a Firebase-enabled deployment to see them. Your local ERD projects and SQL practice are unaffected."
+          subTitle="Modul tugas dan praktikum dibuat oleh Instruktur dan dibagikan melalui Firestore. Masuk menggunakan akun terhubung untuk mengaksesnya. Proyek ERD lokal dan latihan SQL tetap dapat digunakan secara offline."
         />
       </div>
     )
   }
 
-  return user.role === 'lecturer' ? <LecturerAssignments /> : <StudentAssignments />
+  return isLecturerOrAdmin(user.role) ? <LecturerAssignments /> : <StudentAssignments />
 }

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Button, Card, Col, Row, Space, Tag, Typography } from 'antd'
 import {
   ApartmentOutlined,
+  BookOutlined,
   CloudUploadOutlined,
   ConsoleSqlOutlined,
   DatabaseOutlined,
@@ -29,7 +30,7 @@ export function DashboardPage() {
         </div>
 
         <Row gutter={[16, 16]}>
-          <Col xs={24} md={8}>
+          <Col xs={24} sm={12} lg={6}>
             <Card
               title={
                 <Space>
@@ -38,19 +39,23 @@ export function DashboardPage() {
                 </Space>
               }
               extra={<Tag color="success">Available</Tag>}
+              style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+              bodyStyle={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
             >
               <Typography.Paragraph type="secondary">
                 Draw tables, columns, keys and relationships visually. Validation gives instant
                 feedback.
               </Typography.Paragraph>
-              <Link to="/projects">
-                <Button type="primary" icon={<RocketOutlined />}>
-                  Open my projects
-                </Button>
-              </Link>
+              <div>
+                <Link to="/projects">
+                  <Button type="primary" icon={<RocketOutlined />} block>
+                    Open my projects
+                  </Button>
+                </Link>
+              </div>
             </Card>
           </Col>
-          <Col xs={24} md={8}>
+          <Col xs={24} sm={12} lg={6}>
             <Card
               title={
                 <Space>
@@ -59,22 +64,63 @@ export function DashboardPage() {
                 </Space>
               }
               extra={<Tag color="green">Ready</Tag>}
+              style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+              bodyStyle={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
             >
-              <Typography.Paragraph type="secondary">
-                Generate CREATE TABLE statements from your ERD, insert data and run real SQL on a
-                SQLite database in your browser.
-              </Typography.Paragraph>
-              <Link to="/projects">
-                <Button type="primary" icon={<ConsoleSqlOutlined />}>
-                  Open SQL Playground
-                </Button>
-              </Link>
-              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                You must open or create a project first to access the database.
-              </Typography.Text>
+              <div>
+                <Typography.Paragraph type="secondary">
+                  Generate CREATE TABLE statements from your ERD, insert data and run real SQL on a
+                  SQLite database in your browser.
+                </Typography.Paragraph>
+              </div>
+              <Space direction="vertical" style={{ width: '100%' }} size={4}>
+                <Link to="/projects">
+                  <Button type="primary" icon={<ConsoleSqlOutlined />} block>
+                    Open SQL Playground
+                  </Button>
+                </Link>
+                <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                  Open or create a project first.
+                </Typography.Text>
+              </Space>
             </Card>
           </Col>
-          <Col xs={24} md={8}>
+          <Col xs={24} sm={12} lg={6}>
+            <Card
+              title={
+                <Space>
+                  <BookOutlined />
+                  My Courses
+                </Space>
+              }
+              extra={<Tag color="blue">New!</Tag>}
+              style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+              bodyStyle={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
+            >
+              <Typography.Paragraph type="secondary">
+                Enrolled courses with assignments and guided tasks to learn database management.
+              </Typography.Paragraph>
+              <div>
+                {!isFirebaseConfigured() ? (
+                  <Space direction="vertical" style={{ width: '100%' }} size={4}>
+                    <Button disabled icon={<RocketOutlined />} block>
+                      Login Required
+                    </Button>
+                    <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                      Sign in with Firebase to view courses.
+                    </Typography.Text>
+                  </Space>
+                ) : (
+                  <Link to="/courses">
+                    <Button type="primary" icon={<RocketOutlined />} block>
+                      View Courses
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} lg={6}>
             <Card
               title={
                 <Space>
@@ -83,31 +129,36 @@ export function DashboardPage() {
                 </Space>
               }
               extra={<Tag color="blue">Beta</Tag>}
+              style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+              bodyStyle={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
             >
               <Typography.Paragraph type="secondary">
                 Sign in with your campus account, receive assignments and submit your database work
                 to your lecturer.
               </Typography.Paragraph>
-              {!isFirebaseConfigured() ? (
-                <>
-                  <Button
-                    danger
-                    icon={<WarningOutlined />}
-                    disabled
-                  >
-                    Coming soon
-                  </Button>
-                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                    Configure Firebase Connection in Settings first.
-                  </Typography.Text>
-                </>
-              ) : (
-                <Link to="/assignments">
-                  <Button type="primary" icon={<RocketOutlined />}>
-                    View Assignments
-                  </Button>
-                </Link>
-              )}
+              <div>
+                {!isFirebaseConfigured() ? (
+                  <Space direction="vertical" style={{ width: '100%' }} size={4}>
+                    <Button
+                      danger
+                      icon={<WarningOutlined />}
+                      disabled
+                      block
+                    >
+                      Coming soon
+                    </Button>
+                    <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                      Configure Firebase in Settings first.
+                    </Typography.Text>
+                  </Space>
+                ) : (
+                  <Link to="/assignments">
+                    <Button type="primary" icon={<RocketOutlined />} block>
+                      View Assignments
+                    </Button>
+                  </Link>
+                )}
+              </div>
             </Card>
           </Col>
         </Row>

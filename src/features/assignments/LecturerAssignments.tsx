@@ -193,20 +193,21 @@ export function LecturerAssignments() {
 
   return (
     <div>
-      <Space style={{ width: '100%', justifyContent: 'space-between', marginBottom: 12 }}>
+      <div className="page-header" style={{ marginBottom: 12 }}>
         <Typography.Title level={3} style={{ margin: 0 }}>
           Assignment management
         </Typography.Title>
         <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
           New assignment
         </Button>
-      </Space>
+      </div>
       {error && <Alert type="error" showIcon message={error} style={{ marginBottom: 12 }} />}
       <Table
         rowKey="assignmentId"
         loading={loading}
         dataSource={assignments}
         pagination={false}
+        scroll={{ x: 'max-content' }}
         columns={[
           { title: 'Title', dataIndex: 'title' },
           {
@@ -270,7 +271,7 @@ export function LecturerAssignments() {
         open={editorOpen}
         onCancel={() => setEditorOpen(false)}
         onOk={() => void handleSave()}
-        width={720}
+        width="min(720px, 95vw)"
         okText="Save"
       >
         <Form form={form} layout="vertical">

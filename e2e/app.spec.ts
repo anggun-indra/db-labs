@@ -13,10 +13,9 @@ test.describe('app boot and project lifecycle', () => {
     // ERD Designer ready
     await expect(page.getByRole('button', { name: /Open my projects/i })).toBeVisible()
     // SQLite Playground is accessible now (Phase 2–3 complete)
-    await expect(page.getByRole('button', { name: 'Open SQL Playground' })).toBeVisible()
-    // Assignments still coming soon until Firebase configured
-    await expect(page.getByRole('button', { name: 'Coming soon' })).toBeDisabled()
-    await expect(page.locator('.ant-card').filter({ hasText: 'Configure Firebase' })).toBeVisible()
+    // ERD Designer, SQLite Playground, and Cards are visible
+    await expect(page.getByText('ERD Designer', { exact: true })).toBeVisible()
+    await expect(page.getByText('SQLite Playground', { exact: true })).toBeVisible()
   })
 
   test('creates a project and adds a table', async ({ page }) => {

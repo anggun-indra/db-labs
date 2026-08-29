@@ -13,8 +13,8 @@ body {
  * sidebar fill token, 60px logo row with a round collapse icon button, and
  * Settings pinned to the bottom foot area. */
 .app-sider {
-  background: var(--dsw-specific-sidebar-fill) !important;
-  border-right: 1px solid var(--dsw-alias-border-l1);
+  border-right: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-base);
 }
 
 .app-sider .ant-layout-sider-children {
@@ -183,6 +183,7 @@ body {
   align-items: center;
   gap: 8px;
   min-width: 0;
+  flex-shrink: 1;
 }
 
 .app-header {
@@ -192,10 +193,17 @@ body {
   background: var(--dsw-alias-bg-base);
   border-bottom: 1px solid var(--dsw-alias-border-l2);
   padding-inline: 20px;
+  gap: 8px;
+  min-height: 56px;
+  line-height: normal;
 }
 
 .app-header__title {
   color: var(--dsw-alias-label-primary);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .app-header__version {
@@ -215,20 +223,34 @@ body {
 
 .app-header__link {
   color: var(--dsw-alias-label-primary);
+  display: inline-flex;
+  align-items: center;
 }
 
 .app-header__link:hover {
   color: var(--dsw-static-deepseek-450);
 }
 
+.app-header__user-label {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
+
 .app-content {
   padding: 24px;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .page-narrow {
   max-width: 1100px;
   margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .page-centered {
@@ -236,6 +258,17 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 24px 16px;
+  box-sizing: border-box;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
 }
 
 .empty-state {
@@ -244,6 +277,32 @@ body {
 
 .code-font {
   font-family: var(--ds-font-family-code);
+}
+
+/* Mobile & Tablet responsive layout refinements */
+@media (max-width: 768px) {
+  .app-header {
+    padding-inline: 12px;
+  }
+
+  .app-header__title {
+    max-width: 150px;
+    font-size: 13px;
+  }
+
+  .app-header__user-label {
+    display: none;
+  }
+
+  .app-content {
+    padding: 12px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .app-content {
+    padding: 16px;
+  }
 }
 
 /* ERD canvas helpers — token-driven so the canvas follows the theme. */

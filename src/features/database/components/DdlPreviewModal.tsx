@@ -34,7 +34,7 @@ export function DdlPreviewModal({
     <Modal
       title={mode === 'create' ? 'Generated SQLite schema' : 'Rebuild database from ERD'}
       open={open}
-      width={720}
+      width="min(720px, 95vw)"
       onCancel={onCancel}
       footer={
         <Space>

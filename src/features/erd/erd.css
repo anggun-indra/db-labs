@@ -5,8 +5,15 @@
 .erd-editor {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 112px); /* header + content padding */
+  height: calc(100dvh - 112px); /* header + content padding with dynamic viewport */
   min-height: 480px;
+}
+
+@media (max-width: 768px) {
+  .erd-editor {
+    height: calc(100dvh - 88px);
+    min-height: 420px;
+  }
 }
 
 .erd-editor__canvas {
@@ -43,6 +50,13 @@
   flex-wrap: wrap;
 }
 
+@media (max-width: 768px) {
+  .erd-toolbar {
+    padding: 6px 8px;
+    gap: 8px;
+  }
+}
+
 /* Keep toolbar actions reachable while the (mask-less) inspector drawer
    overlaps the right side — mirrors how dsh panels avoid covering primary
    controls. */
@@ -55,8 +69,16 @@
 
 .erd-toolbar__name {
   font-weight: 600;
+  flex: 1 1 140px;
+  min-width: 100px;
   max-width: 260px;
   color: var(--dsw-alias-label-primary);
+}
+
+@media (max-width: 480px) {
+  .erd-toolbar__name {
+    max-width: 100%;
+  }
 }
 
 /* Table node -------------------------------------------------------------- */
@@ -156,6 +178,16 @@
   overflow: hidden;
 }
 
+@media (max-width: 640px) {
+  .validation-panel {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    width: auto;
+    max-width: none;
+  }
+}
+
 .validation-panel__header {
   display: flex;
   align-items: center;
@@ -210,6 +242,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
 .table-inspector__column-flags .ant-checkbox-wrapper {

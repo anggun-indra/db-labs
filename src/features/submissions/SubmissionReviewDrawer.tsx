@@ -138,7 +138,8 @@ export function SubmissionReviewDrawer({
       title={assignment ? `Submissions — ${assignment.title}` : 'Submissions'}
       open={open}
       onClose={onClose}
-      width={760}
+      width="min(760px, 100vw)"
+      style={{ maxWidth: '100vw' }}
     >
       {error && <Alert type="error" showIcon message={error} style={{ marginBottom: 12 }} />}
       {loading ? (
@@ -211,6 +212,7 @@ export function SubmissionReviewDrawer({
               size="small"
               rowKey="id"
               pagination={false}
+              scroll={{ x: 'max-content' }}
               style={{ marginBottom: 12 }}
               dataSource={validationIssues.slice(0, 10)}
               columns={[
